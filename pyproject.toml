@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "theweave"
-version = "0.1.0"
+version = "0.1.1"
 description = "The Weave 2.0 — markdown-native agentic AI memory architecture. Five-pattern engine over a plain-markdown vault, exposed via the Model Context Protocol."
 readme = "README.md"
 license = { file = "LICENSE" }

@@ -56,18 +56,27 @@ def info(vault: str | None) -> None:
     v = _resolve_vault(vault)
     notes = list(v.iter_notes())
     by_dir: dict[str, int] = {}
+    root_files: list[str] = []
     for n in notes:
-        top = n.rel_path.split("/", 1)[0]
-        by_dir[top] = by_dir.get(top, 0) + 1
+        parts = n.rel_path.split("/", 1)
+        if len(parts) == 2:
+            by_dir[parts[0]] = by_dir.get(parts[0], 0) + 1
+        else:
+            root_files.append(parts[0])
 
     from .pro.llm import is_mock
     mode = "MOCK (offline — set ANTHROPIC_API_KEY to switch)" if is_mock() else "Claude (live API)"
 
     click.echo("🪶 Weave 2.0 — sandbox")
     click.echo(f"  vault: {v.root}")
-    click.echo(f"  notes: {len(notes)} across {len(by_dir)} top-level folders")
+    summary = f"{len(by_dir)} folder(s)"
+    if root_files:
+        summary += f" + {len(root_files)} root file(s)"
+    click.echo(f"  notes: {len(notes)} across {summary}")
     for k, n in sorted(by_dir.items()):
         click.echo(f"    {k}/: {n}")
+    for fname in sorted(root_files):
+        click.echo(f"    {fname}")
     click.echo("")
     click.echo("Pattern wiring:")
     click.echo("  1. Weave Core 5-verb MCP   ✅ (run `weave mcp` or `python -m weave.mcp_server`)")

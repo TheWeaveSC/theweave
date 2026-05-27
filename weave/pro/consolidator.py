@@ -90,14 +90,14 @@ class Consolidator:
         cutoff = today - timedelta(days=self.window_days)
         recent: list[tuple[date, Note]] = []
         for note in self.vault.iter_notes():
-            if not note.rel_path.startswith("sessions/"):
+            if not _path_contains_dir(note.rel_path, "sessions"):
                 continue
             d = self._note_date(note)
             if d is None:
                 continue
             if d >= cutoff:
                 recent.append((d, note))
-        recent.sort()
+        recent.sort(key=lambda pair: (pair[0], pair[1].rel_path))
         return [n for _, n in recent]
 
     def _note_date(self, note: Note) -> date | None:
@@ -133,7 +133,8 @@ class Consolidator:
 
     def _signal_files(self) -> list[Note]:
         return [n for n in self.vault.iter_notes()
-                if n.rel_path.startswith("LearningLayer/") and n.metadata.get("type") == "learning-signals"]
+                if _path_contains_dir(n.rel_path, "LearningLayer")
+                and n.metadata.get("type") == "learning-signals"]
 
     # ---------- build report ----------
 
@@ -230,6 +231,12 @@ class Consolidator:
         path = archive_dir / f"consolidation-{stamp}.md"
         path.write_text(report.to_markdown(), encoding="utf-8")
         return str(path.relative_to(self.vault.root))
+
+
+def _path_contains_dir(rel_path: str, name: str) -> bool:
+    # Match `<name>/` anywhere in the relative path (works for both the
+    # seed-vault flat layout and the canonical `<VaultName>Vault/<name>/` layout).
+    return f"/{name}/" in f"/{rel_path}"
 
 
 _SECTION_RE = re.compile(r"^(## Recent activity[^\n]*\n.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
