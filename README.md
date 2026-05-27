@@ -155,13 +155,15 @@ pip install -e .
 weave-cli doctor
 ```
 
-### Zero-clone install *(v0.3)*
+### Zero-clone install (recommended for learners)
 
 ```bash
-# Coming with v0.3 — downloads the release tarball from GitHub, sets up a venv,
-# and drops weave-cli on your PATH. No GitHub auth required learner-side.
 curl -sSL https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.sh | bash
 ```
+
+Downloads the tagged release tarball, sets up a Python venv at `~/theweave/venv/`, installs the package, and symlinks `weave-cli` into `~/.local/bin/` if it's on your PATH. Runs `weave-cli doctor` as the success signal. No GitHub authentication required — the tarball is fetched from the public releases endpoint.
+
+Overridable via env vars: `WEAVE_VERSION`, `WEAVE_HOME`, `PYTHON`. See [`install-weave.sh`](install-weave.sh).
 
 ### MCP integration with Claude Desktop
 
