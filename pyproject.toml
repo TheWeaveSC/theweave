@@ -67,4 +67,4 @@ Issues = "https://github.com/TheWeaveSC/theweave/issues"
 
 [tool.setuptools.packages.find]
 include = ["weave*"]
-exclude = ["tests*", "seed-vault*", "docs*"]
+exclude = ["tests*", "seed-vault*", "docs*", "personas*"]

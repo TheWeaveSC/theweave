@@ -1,69 +1,80 @@
-# 🪶 The Weave 2.0 — sandbox prototype
+# TheWeave
 
-Built overnight while SC slept. Five memory-architecture patterns standing up on a synthetic vault, each runnable from a single CLI. Completely isolated from the real SecondBrain.
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![Version](https://img.shields.io/badge/version-0.2.0-orange.svg)](CHANGELOG.md)
+[![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io)
 
-**Sandbox location:** `~/weave-2.0-sandbox/`
-**Real vault touched:** zero files
+**Claude memory you can `cat`, grep, and git.**
+
+A markdown-native memory architecture for Claude and any MCP-aware agent. Your assistant's memory lives as plain `.md` files in a directory you own — inspectable in your text editor, versionable in git, portable across machines — not in an opaque vector database somewhere else.
+
+Five composable patterns sit on top of the same vault:
+
+1. **Weave Core MCP** — 5-verb memory tool over any markdown directory
+2. **PPR boot retriever** — query-driven Personalized PageRank, not pre-baked dumps
+3. **Bi-temporal resolver** — facts have `valid_from` / `superseded_by`; time-travel queries built in
+4. **Sleep-time consolidator** — recent activity gets patched back into entity files; reflect synthesis runs over the learning log
+5. **Write-time conflict resolver** — k-NN + LLM verdict refuses to ADD a duplicate when an UPDATE is correct
+
+The substrate is just markdown and YAML frontmatter. No services, no embeddings DB, no Ollama. The 5-verb tool ships zero-infra; the richer patterns layer on top of the same files.
 
 ---
 
-## Dependencies
-
-| Layer | What | Required? |
-|---|---|---|
-| Engine runtime | Python ≥ 3.11; deps installed via `pip install -e .` | **Yes** |
-| AI ↔ vault | Claude Desktop (or any MCP-aware client) with the `weave-core` server registered | **Yes** |
-| Human ↔ vault | A markdown editor. **[Obsidian](https://obsidian.md/)** is recommended because it renders `[[wikilinks]]` and the backlink graph natively, which is most of the v2 UX. The engine works against any directory of `.md` files — Obsidian is not required for AI memory to function. | Recommended |
-| Pattern 4/5 live mode | `ANTHROPIC_API_KEY` exported. Without it, both patterns run in deterministic mock mode. | Optional |
-| Local LLM (Ollama / Hermes) | Not used by The Weave 2.0 at any layer. | – |
-
-After install, run `./weave-cli doctor` to verify the full stack — engine, vault, environment, and optionally Claude Desktop MCP wiring with `--check-mcp`.
-
----
-
-## 60-second wake-up tour
+## Quickstart
 
 ```bash
-cd ~/weave-2.0-sandbox
+git clone https://github.com/TheWeaveSC/theweave.git ~/theweave
+cd ~/theweave
+pip install -e .
 
-# 0 — health check (engine + vault + environment)
-./weave-cli doctor --vault /path/to/your/vault --check-mcp
+# verify the install end-to-end
+weave-cli doctor
 
-# 1 — what's wired
-./weave-cli info
-
-# 2 — Pattern 2: query-driven boot (replaces the static SONNET-BOOT.md)
-./weave-cli demo boot "ACME cutover with Marcus"
-
-# 3 — Pattern 3: bi-temporal hop (the GorlyERP-v1.0.7 → v1.2.8 problem, solved)
-./weave-cli demo current entity-ACME
-./weave-cli demo current entity-ACME --as-of 2026-01-01   # time-travel
-
-# 4 — Pattern 5: write-time conflict resolution
-./weave-cli demo write-fixture
-./weave-cli demo write /tmp/weave-fixture-new-session.md
-
-# 5 — Pattern 4: sleep-time consolidator (dry-run by default)
-./weave-cli demo consolidate --today 2026-05-23
-./weave-cli demo consolidate --today 2026-05-23 --apply   # patches entities + backs up to _archive/
-
-# 6 — Pattern 1: launch the MCP server (stdio) for Claude Desktop
-./weave-cli mcp   # blocks; Ctrl+C to quit
+# try the included demo vault
+weave-cli demo boot "ACME cutover with Marcus"
+weave-cli demo current entity-ACME --as-of 2026-01-01   # time-travel
+weave-cli demo consolidate --today 2026-05-23           # dry-run
 ```
+
+Requires Python ≥ 3.11. For a zero-clone install path (no GitHub auth required), see [Install](#install).
 
 ---
 
-## What's wired vs what's stubbed
+## Bring your own persona
 
-| Pattern | Implementation | LLM dependency | Production-ready? |
-|---|---|---|---|
-| **1. Weave Core 5-verb MCP** | Full — `view/create/str_replace/insert/delete` over any vault; path-escape protected | None | ✅ ships as-is |
-| **2. PPR boot retrieval** | Full — NetworkX Personalized PageRank, frontmatter-aware wikilink graph, bi-temporal-aware seed resolution | None | ✅ ships as-is |
-| **3. Bi-temporal resolver** | Full — `superseded_by` chain walker, `as_of` time travel, current-entity filter | None | ✅ ships as-is |
-| **4. Sleep-time consolidator** | Scanning + per-entity activity patching + reflect-bucketing full. Reflect synthesis is mock by default (deterministic keyword bucketing). | Real Claude via `ANTHROPIC_API_KEY` env var (lazy import — install `anthropic` SDK when ready) | 🟡 mock now; one env var to real |
-| **5. Write-time conflict resolution** | Full — TF-IDF k-NN candidate search, name-match bypass, superseded-entity redirect, ADD/UPDATE/DELETE/NOOP verdicts. Mock heuristic by default. | Same as above | 🟡 mock now; one env var to real |
+TheWeave is vault-native. Your assistant's *identity* — voice, working style, the relationship you've built — is itself just markdown in the vault. Persona memories load on every session; factual memories get retrieved on demand. Same primitive, same files, different loading discipline.
 
-All persistence layers use **plain markdown files**. No ChromaDB. No Ollama. No services. The sandbox demonstrates that the substrate (Anthropic 5-verb shape + wikilink graph) carries 80% of the architecture; only the LLM-classification steps need a model.
+That means a persona is just a starter vault you can fork:
+
+```bash
+# clone a starter vault and verify the engine sees it
+cp -R personas/sonnet ~/my-vault
+weave-cli doctor --vault ~/my-vault --check-mcp
+$EDITOR ~/my-vault/entities/entity-user.md   # personalize the user identity
+```
+
+Starter vaults shipped in this repo:
+
+- **[`seed-vault/`](seed-vault/)** — neutral fictional starter (ACME / FOO entities). Best for kicking the tires on the five patterns.
+- **[`personas/sonnet/`](personas/sonnet/)** — a starter built around a terse, audit-discipline Claude collaborator. Voice, working-style, and relationship scaffolding pre-wired. See [`personas/sonnet/README.md`](personas/sonnet/README.md) for the layout and fork instructions.
+
+Or skip the starter and point TheWeave at any existing markdown directory — Obsidian, your notes repo, dotfiles. The engine adapts to whatever layout you have.
+
+---
+
+## What this is (and isn't)
+
+|  | TheWeave | Vector-DB memory layers |
+|---|---|---|
+| **Storage** | Plain `.md` files in your filesystem | Vendor DB / Pinecone / pgvector |
+| **Inspection** | `cat`, `grep`, `rg`, your text editor | API query or admin UI |
+| **Versioning** | `git diff`, `git log`, `git blame` | Snapshot/export tools |
+| **Schema** | Open YAML frontmatter | Vendor DB schema |
+| **Failure mode** | A bad markdown file you can edit by hand | A bad row you have to query out |
+| **Vendor lock-in** | None — it's a folder | Migration tool required |
+
+TheWeave is **not** a chat-memory bolt-on. It's the memory layer for Claude when you want the data on your machine, in your filesystem, in a format you can read.
 
 ---
 
@@ -71,11 +82,11 @@ All persistence layers use **plain markdown files**. No ChromaDB. No Ollama. No 
 
 ```
                     ┌──────────────────────────────────────┐
-                    │   The Weave 2.0 — two-tier design    │
+                    │       TheWeave — two-tier design     │
                     └──────────────────────────────────────┘
 
 ╔════════════════════════════════════════════════════════════════════╗
-║  WEAVE CORE  (zero-infra, Claude Desktop / Cowork installable)     ║
+║  WEAVE CORE  (zero-infra, drop-in MCP server)                      ║
 ║                                                                    ║
 ║  ┌─────────────────────────────────────────────────────────────┐  ║
 ║  │  MCP server — 5 verbs over any markdown vault               │  ║
@@ -91,7 +102,7 @@ All persistence layers use **plain markdown files**. No ChromaDB. No Ollama. No 
                               │
                               ▼ (same vault, richer engine)
 ╔════════════════════════════════════════════════════════════════════╗
-║  WEAVE PRO  (your machine + Hermes/Ollama eventually)              ║
+║  WEAVE PRO  (Python engine on your machine)                        ║
 ║                                                                    ║
 ║  Pattern 2 — Query → entity-extract → Personalized PageRank →      ║
 ║              top-N notes (bi-temporal-aware)                       ║
@@ -115,85 +126,97 @@ All persistence layers use **plain markdown files**. No ChromaDB. No Ollama. No 
 ╚════════════════════════════════════════════════════════════════════╝
 ```
 
-The two tiers share **one vault**. Different engines on top. Weave Academy learners install only the Core tier (an MCP server in their Claude Desktop config). SC's own setup runs both.
+Both tiers share **one vault**. Core ships zero-infra (an MCP entry in `claude_desktop_config.json` and you're in). Pro adds the richer engine without changing the data format.
 
 ---
 
-## How each pattern closes the gaps we discussed
+## Pattern status
 
-You said the two gaps were **memory gap** (boot is manual + lossy, no temporal evolution of facts) and **learning-loop gap** (LearningLayer captures observations but they don't reshape behaviour).
+| # | Pattern | Implementation | LLM dependency |
+|---|---|---|---|
+| 1 | **Weave Core MCP** | Stable — 5 verbs, path-escape protected | None |
+| 2 | **PPR boot retrieval** | Stable — NetworkX, frontmatter-aware wikilinks, bi-temporal seed resolution | None |
+| 3 | **Bi-temporal resolver** | Stable — `superseded_by` walker, `as_of` time-travel | None |
+| 4 | **Sleep-time consolidator** | Stable scan + patch. Reflect synthesis uses mock heuristic by default; live Claude with `ANTHROPIC_API_KEY` | Optional |
+| 5 | **Write-time conflict resolver** | Stable TF-IDF + verdict pipeline. Mock classifier by default; live Claude with `ANTHROPIC_API_KEY` | Optional |
 
-| Gap | Pattern that closes it |
-|---|---|
-| Re-orientation is manual on every new session | **Pattern 2** — boot is query-driven, not pre-baked. Parser bugs become irrelevant because nothing is pre-computed. |
-| Wikilinks are flat — no time | **Pattern 3** — `superseded_by` makes time first-class. `entity-ACME` always resolves forward; `--as-of` lets you read historical state. |
-| Observations get written but don't loop back | **Pattern 4** — every consolidation cycle pulls recent activity INTO the entity files and runs reflect over LearningLayer. The loop closes. |
-| New session notes overwrite or duplicate existing facts | **Pattern 5** — every write goes through k-NN + verdict; the system actively refuses to ADD a duplicate when an UPDATE is correct. |
-| Distribution: Weave Academy learners can't bring Ollama with them | **Pattern 1** — 5 verbs, no infra. Anthropic memory tool shape. One MCP entry in `claude_desktop_config.json` and they're in. |
+All persistence is plain markdown. No ChromaDB, no Ollama, no services. The 5-verb substrate carries ~80% of the architecture; only the classifier steps in Patterns 4 and 5 need an LLM.
 
 ---
 
-## Switching from MOCK to live Claude
+## Install
+
+### Editable install (current path)
+
+```bash
+git clone https://github.com/TheWeaveSC/theweave.git ~/theweave
+cd ~/theweave
+pip install -e .
+weave-cli doctor
+```
+
+### Zero-clone install *(v0.3)*
+
+```bash
+# Coming with v0.3 — downloads the release tarball from GitHub, sets up a venv,
+# and drops weave-cli on your PATH. No GitHub auth required learner-side.
+curl -sSL https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.sh | bash
+```
+
+### MCP integration with Claude Desktop
+
+Copy `docs/claude-desktop-config.snippet.json` into your `~/Library/Application Support/Claude/claude_desktop_config.json` under `mcpServers`. Restart Claude Desktop. The 5 verbs become available as `weave-core/view`, `weave-core/create`, etc.
+
+---
+
+## Live Claude mode (Patterns 4 & 5)
 
 Patterns 4 and 5 default to deterministic mock implementations. To go live:
 
 ```bash
 pip install anthropic
 export ANTHROPIC_API_KEY=...
-export WEAVE_CLAUDE_MODEL=claude-sonnet-4-6   # optional override
-./weave-cli demo consolidate                  # now uses Claude for the reflect step
-./weave-cli demo write /tmp/foo.md            # now uses Claude for the verdict
+export WEAVE_CLAUDE_MODEL=claude-sonnet-4-6   # optional
+weave-cli demo consolidate                    # reflect step now uses Claude
+weave-cli demo write /tmp/foo.md              # verdict now uses Claude
 ```
 
-The `weave/pro/llm.py` selector picks `anthropic_llm` whenever `ANTHROPIC_API_KEY` is set, falls back to `mock_llm` otherwise. Code paths are identical; only the classifier swaps.
+The `weave/pro/llm.py` selector picks `anthropic_llm` whenever `ANTHROPIC_API_KEY` is set, falling back to `mock_llm` otherwise. Code paths are identical; only the classifier swaps.
 
 ---
 
-## Installing the Core MCP into Claude Desktop
+## Dependencies
 
-Copy `docs/claude-desktop-config.snippet.json` into your existing `~/Library/Application Support/Claude/claude_desktop_config.json` under `mcpServers`. Restart Claude Desktop. The 5 verbs become available as `weave-core/view`, `weave-core/create`, etc.
+| Layer | What | Required? |
+|---|---|---|
+| Engine runtime | Python ≥ 3.11; `pip install -e .` installs the rest | **Yes** |
+| AI ↔ vault | Claude Desktop, [Cowork](https://cowork.anthropic.com/), or any MCP client with `weave-core` registered | **Yes** |
+| Human ↔ vault | Any markdown editor. [Obsidian](https://obsidian.md/) is recommended for the native wikilink + backlink-graph UX, but not required. | Recommended |
+| Patterns 4 & 5 live mode | `ANTHROPIC_API_KEY` exported | Optional |
 
-For the Weave Academy install path, the same snippet is the entire integration — no Ollama, no Hermes, no DB.
-
----
-
-## Files
-
-```
-weave-2.0-sandbox/
-├── weave/                     # Python package
-│   ├── vault.py               # rooted vault; wikilink scan over body + frontmatter
-│   ├── core.py                # Pattern 1 — 5-verb memory tool
-│   ├── mcp_server.py          # FastMCP server exposing the 5 verbs
-│   ├── cli.py                 # `weave demo …` entry-point
-│   ├── __main__.py            # python -m weave
-│   └── pro/
-│       ├── bitemporal.py      # Pattern 3
-│       ├── ppr.py             # Pattern 2
-│       ├── similarity.py      # TF-IDF k-NN (stdlib only)
-│       ├── conflict.py        # Pattern 5
-│       ├── consolidator.py    # Pattern 4
-│       ├── mock_llm.py        # offline classifiers
-│       ├── anthropic_llm.py   # live Claude classifiers
-│       └── llm.py             # selector by env var
-├── seed-vault/                # synthetic 15-note vault for the demo
-├── docs/
-│   ├── architecture.md
-│   └── claude-desktop-config.snippet.json
-├── weave-cli                  # bash convenience wrapper
-├── BUILD-LOG.md               # what was done overnight
-└── README.md                  # this file
-```
+After install, `weave-cli doctor` verifies the full stack — engine, vault, environment, and optionally Claude Desktop MCP wiring with `--check-mcp`.
 
 ---
 
-## Caveats (full honesty, since you're tired)
+## Limitations
 
-- **Python 3.14 was used** for the sandbox. LD #4 pins 3.11 because of ChromaDB. The sandbox doesn't use ChromaDB so 3.14 was fine. If you graft Patterns 2–5 into cortex-mem later, switch back to `~/.local/bin/python3.11`.
-- **Consolidator's reflect step is mock-quality** without the API key. The bucketing-by-keywords is honest stub — not a substitute for a real synthesis pass.
-- **TF-IDF in the conflict resolver is short-doc-fragile.** Short candidate notes get low similarity scores even when they're conceptually identical; the name-match bypass covers most of this. Real embeddings (nomic-embed-text via Ollama) would be the production path.
-- **PPR is run-time over the whole graph**, not cached. Fine for vaults <1k notes; pre-compute and cache for larger vaults.
-- **MCP server has been smoke-tested via the Python API** (tools list, schema construction). Full end-to-end with Claude Desktop requires you to register the config snippet on your side — I deliberately did not modify your `claude_desktop_config.json`.
-- **The seed vault uses fictional entity names** (ACME / FOO / Marcus) so nothing looks like a stale copy of real Weave data if anyone glances at this directory.
+Honest list of what's rough:
 
-See `BUILD-LOG.md` for the chronological build log.
+- **TF-IDF in the conflict resolver is short-doc-fragile.** Short candidate notes get low similarity scores even when conceptually identical. The name-match bypass covers most of this; real embeddings (e.g., `nomic-embed-text`) would be the production path.
+- **PPR runs over the whole graph per query**, not cached. Fine for vaults under ~1,000 notes; pre-compute and cache for larger ones.
+- **Consolidator's mock reflect step is keyword-bucketing.** Honest stub, not a substitute for the live-Claude reflect pass.
+- **Live LLM mode is Claude only.** No OpenAI / Gemini / Ollama backends — open for contribution.
+
+---
+
+## Documentation
+
+- [`docs/architecture.md`](docs/architecture.md) — deeper technical write-up
+- [`docs/v2-switchover-guide.md`](docs/v2-switchover-guide.md) — migrating from v1
+- [`CHANGELOG.md`](CHANGELOG.md) — release history
+
+---
+
+## License
+
+[Apache License 2.0](LICENSE).
