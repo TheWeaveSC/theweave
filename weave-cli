@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Convenience wrapper so SC can run `./weave-cli demo info` without activating venv.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+exec "$DIR/.venv/bin/python" -m weave "$@"
