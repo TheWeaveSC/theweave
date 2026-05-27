@@ -7,9 +7,11 @@
 #   curl -sSL https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.sh | bash
 #   # or, with overrides:
 #   WEAVE_VERSION=0.2.0 WEAVE_HOME=~/theweave bash install-weave.sh
+#   # or, install from a local tarball (preview / private-repo test path):
+#   WEAVE_TARBALL=~/Downloads/theweave-preview.tar.gz bash install-weave.sh
 #
 # No GitHub authentication required. Tarball is fetched from the public
-# releases endpoint.
+# releases endpoint by default, or read from a local file if WEAVE_TARBALL is set.
 
 set -euo pipefail
 
@@ -76,15 +78,24 @@ fi
 mkdir -p "$WEAVE_HOME"
 ok "WEAVE_HOME: $WEAVE_HOME"
 
-# ── download + extract ──────────────────────────────────────────────────
+# ── source + extract ────────────────────────────────────────────────────
 info ""
-info "[Download]"
-TARBALL_URL="https://github.com/${WEAVE_REPO}/archive/refs/tags/v${WEAVE_VERSION}.tar.gz"
-info "  ${C_DIM}${TARBALL_URL}${C_RESET}"
-if ! curl -sSL --fail "$TARBALL_URL" | tar -xz -C "$WEAVE_HOME" --strip-components=1; then
-  fail "Download failed. Check that release v${WEAVE_VERSION} exists at github.com/${WEAVE_REPO}/releases."
+info "[Source]"
+if [ -n "${WEAVE_TARBALL:-}" ]; then
+  [ -f "$WEAVE_TARBALL" ] || fail "WEAVE_TARBALL set but file not found: $WEAVE_TARBALL"
+  info "  ${C_DIM}local tarball: ${WEAVE_TARBALL}${C_RESET}"
+  if ! tar -xz -C "$WEAVE_HOME" --strip-components=1 < "$WEAVE_TARBALL"; then
+    fail "Extraction failed from $WEAVE_TARBALL"
+  fi
+  ok "Extracted source to $WEAVE_HOME (from local tarball)"
+else
+  TARBALL_URL="https://github.com/${WEAVE_REPO}/archive/refs/tags/v${WEAVE_VERSION}.tar.gz"
+  info "  ${C_DIM}${TARBALL_URL}${C_RESET}"
+  if ! curl -sSL --fail "$TARBALL_URL" | tar -xz -C "$WEAVE_HOME" --strip-components=1; then
+    fail "Download failed. Check that release v${WEAVE_VERSION} exists at github.com/${WEAVE_REPO}/releases."
+  fi
+  ok "Extracted source to $WEAVE_HOME"
 fi
-ok "Extracted source to $WEAVE_HOME"
 
 # ── venv + install ──────────────────────────────────────────────────────
 info ""
