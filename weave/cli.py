@@ -88,6 +88,25 @@ def info(vault: str | None) -> None:
     click.echo(f"LLM mode: {mode}")
 
 
+# ---------- doctor ----------
+
+@cli.command()
+@click.option("--vault", "-V", default=None,
+              help="Path to the vault. Defaults to $WEAVE_VAULT_PATH; if neither is set, vault checks are skipped.")
+@click.option("--check-mcp/--no-check-mcp", default=False,
+              help="Also check the local Claude Desktop MCP wiring.")
+def doctor(vault: str | None, check_mcp: bool) -> None:
+    """Health check — engine, vault, environment, optional MCP wiring.
+
+    Exit code = number of failures (0 = all good). Warnings do not fail.
+    """
+    from .doctor import run_doctor
+    vault_path = vault or os.environ.get("WEAVE_VAULT_PATH")
+    report = run_doctor(vault_path, include_mcp=check_mcp)
+    click.echo(report.to_text())
+    sys.exit(report.failures())
+
+
 # ---------- demo group ----------
 
 @cli.group()

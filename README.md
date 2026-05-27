@@ -7,10 +7,27 @@ Built overnight while SC slept. Five memory-architecture patterns standing up on
 
 ---
 
+## Dependencies
+
+| Layer | What | Required? |
+|---|---|---|
+| Engine runtime | Python ≥ 3.11; deps installed via `pip install -e .` | **Yes** |
+| AI ↔ vault | Claude Desktop (or any MCP-aware client) with the `weave-core` server registered | **Yes** |
+| Human ↔ vault | A markdown editor. **[Obsidian](https://obsidian.md/)** is recommended because it renders `[[wikilinks]]` and the backlink graph natively, which is most of the v2 UX. The engine works against any directory of `.md` files — Obsidian is not required for AI memory to function. | Recommended |
+| Pattern 4/5 live mode | `ANTHROPIC_API_KEY` exported. Without it, both patterns run in deterministic mock mode. | Optional |
+| Local LLM (Ollama / Hermes) | Not used by The Weave 2.0 at any layer. | – |
+
+After install, run `./weave-cli doctor` to verify the full stack — engine, vault, environment, and optionally Claude Desktop MCP wiring with `--check-mcp`.
+
+---
+
 ## 60-second wake-up tour
 
 ```bash
 cd ~/weave-2.0-sandbox
+
+# 0 — health check (engine + vault + environment)
+./weave-cli doctor --vault /path/to/your/vault --check-mcp
 
 # 1 — what's wired
 ./weave-cli info
