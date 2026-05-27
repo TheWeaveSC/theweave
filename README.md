@@ -37,6 +37,34 @@ weave-cli demo current entity-ACME --as-of 2026-01-01   # time-travel
 weave-cli demo consolidate --today 2026-05-23           # dry-run
 ```
 
+A healthy install looks like:
+
+```
+🪶 Weave 2.0 Doctor
+
+[Engine]
+  ✓ Python 3.11.15 (≥3.11 required)
+  ✓ Dependencies importable
+      mcp 1.27.1, networkx 3.6.1, frontmatter 1.3.0, click 8.4.1, ...
+  ✓ CLI + MCP entry points importable
+  ℹ theweave 0.2.0
+
+[Vault]
+  ✓ Vault root resolves: ~/theweave/seed-vault
+  ✓ Layout: flat (seed-vault style)
+  ✓ 18 notes total — entities 6, sessions 7, signals 1, other 4
+  ✓ Frontmatter parses on all notes
+  ✓ Pattern 4 will scan 7 session(s)
+  ✓ Pattern 2 graph: 18 nodes, 71 edges, 0 isolates (0%)
+  ✓ Bi-temporal coverage: 6/6 entities (100%)
+
+[Environment]
+  ✓ Obsidian.app detected in /Applications/
+  ℹ ANTHROPIC_API_KEY not set — Pattern 4/5 will run in mock mode
+
+All checks passed.
+```
+
 Requires Python ≥ 3.11. For a zero-clone install path (no GitHub auth required), see [Install](#install).
 
 ---
