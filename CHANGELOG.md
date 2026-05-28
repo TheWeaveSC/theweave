@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-28
+
 ### Added
 - **Persona-as-vault primitive.** New top-level [`personas/`](personas/) directory holding fork-and-edit starter vaults. Persona is reframed as a vault you point TheWeave at — same primitive as factual memory, different loading discipline (always-loaded vs retrieved-on-demand).
 - **`personas/sonnet/`** starter — a terse, audit-discipline Claude collaborator persona with voice, working-style, and relationship scaffolding pre-wired. Validates 100% bi-temporal coverage via `weave-cli doctor`.
@@ -46,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Anthropic Claude live-mode path for Patterns 4 and 5 via `ANTHROPIC_API_KEY`; deterministic mock mode by default.
 - Apache 2.0 license.
 
-[Unreleased]: https://github.com/TheWeaveSC/theweave/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/TheWeaveSC/theweave/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.3.0
 [0.2.0]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.2.0
 [0.1.1]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.1.1
 [0.1.0]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.1.0

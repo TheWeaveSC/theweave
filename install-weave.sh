@@ -6,7 +6,7 @@
 # Usage:
 #   curl -sSL https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.sh | bash
 #   # or, with overrides:
-#   WEAVE_VERSION=0.2.0 WEAVE_HOME=~/theweave bash install-weave.sh
+#   WEAVE_VERSION=0.3.0 WEAVE_HOME=~/theweave bash install-weave.sh
 #   # or, install from a local tarball (preview / private-repo test path):
 #   WEAVE_TARBALL=~/Downloads/theweave-preview.tar.gz bash install-weave.sh
 #
@@ -15,7 +15,7 @@
 
 set -euo pipefail
 
-WEAVE_VERSION="${WEAVE_VERSION:-0.2.0}"
+WEAVE_VERSION="${WEAVE_VERSION:-0.3.0}"
 WEAVE_HOME="${WEAVE_HOME:-$HOME/theweave}"
 WEAVE_REPO="${WEAVE_REPO:-TheWeaveSC/theweave}"
 PYTHON="${PYTHON:-}"

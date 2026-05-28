@@ -2,7 +2,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.2.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.3.0-orange.svg)](CHANGELOG.md)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io)
 
 **Claude memory you can `cat`, grep, and git.**
@@ -47,7 +47,7 @@ A healthy install looks like:
   ✓ Dependencies importable
       mcp 1.27.1, networkx 3.6.1, frontmatter 1.3.0, click 8.4.1, ...
   ✓ CLI + MCP entry points importable
-  ℹ theweave 0.2.0
+  ℹ theweave 0.3.0
 
 [Vault]
   ✓ Vault root resolves: ~/theweave/seed-vault
