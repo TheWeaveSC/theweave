@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`tools/migrate_obsidian.py`** — Obsidian-to-TheWeave migration tool. Reads one or more source directories (an Obsidian-style vault plus optional auxiliary directories like an agent's identity home), applies a rule table of glob-pattern → destination-subdir + TheWeave type + filename strategy, filters auto-heal stubs and Obsidian escaped-dot duplicates, rewrites frontmatter with bi-temporal triple + `origin_path` back-reference, preserves wikilinks and body verbatim. `--dry-run` mode prints a per-rule report without writing. Validated end-to-end against an existing 548-note Obsidian vault plus a 250+-file agent home — produced a 663-note TheWeave-shaped vault, doctor green, 100% bi-temporal coverage.
+- **[`docs/migrate-from-obsidian.md`](docs/migrate-from-obsidian.md)** — reusable migration recipe. When to migrate, audit → sample → rules → dry-run → apply → doctor → hand-finish → cutover. Includes a worked example with per-rule outcomes from a real migration.
+
 ## [0.3.0] — 2026-05-28
 
 ### Added
