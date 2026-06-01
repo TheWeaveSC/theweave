@@ -23,16 +23,22 @@ git push origin main vX.Y.Z
 
 ## GitHub release
 
-The auto-generated source tarball at `/archive/refs/tags/vX.Y.Z.tar.gz` is what `install-weave.sh` downloads — it's created automatically when the tag is pushed and requires no manual upload. **But** the installer itself needs to be uploaded as a release asset so users can fetch it from `/releases/latest/download/install-weave.sh`.
+The auto-generated source tarball at `/archive/refs/tags/vX.Y.Z.tar.gz` is what `install-weave.sh` downloads — it's created automatically when the tag is pushed and requires no manual upload. The installer itself also needs to be attached as a release asset so users can fetch it from `/releases/latest/download/install-weave.sh`.
+
+**This is now automated.** Pushing a `vX.Y.Z` tag triggers [`.github/workflows/release.yml`](../.github/workflows/release.yml), which creates the release (with generated notes) if it doesn't exist and attaches `install-weave.sh`.
+
+- [ ] **Verify the asset attached** after the tag push — the workflow run is green AND `gh release view vX.Y.Z --json assets -q '.assets[].name'` lists `install-weave.sh`.
+
+Manual fallback (if the workflow is unavailable, or you rewrote the tag without re-triggering it — e.g. a force-pushed tag):
 
 ```bash
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
   --notes-file <(awk '/^## \['"X.Y.Z"'\]/,/^## \[/' CHANGELOG.md | head -n -1) \
   install-weave.sh
+# or, if the release already exists:
+gh release upload vX.Y.Z install-weave.sh --clobber
 ```
-
-Or via the GitHub UI: Releases → Draft new release → choose tag → upload `install-weave.sh` as asset.
 
 ## Smoke-test the public install
 
