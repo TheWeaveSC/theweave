@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1280px; height:640px; overflow:hidden; }
+  body {
+    background:
+      radial-gradient(1100px 600px at 82% -8%, #2a2a40 0%, rgba(42,42,64,0) 60%),
+      linear-gradient(135deg, #1a1a28 0%, #14141f 100%);
+    color:#cdd6f4;
+    font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:72px 80px;
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .mono { font-family:ui-monospace,"SF Mono","Menlo",monospace; }
+  .kicker {
+    font-family:ui-monospace,"SF Mono","Menlo",monospace;
+    font-size:16px; letter-spacing:.22em; text-transform:uppercase;
+    color:#7f849c; font-weight:600;
+  }
+  .mark { display:flex; align-items:center; gap:16px; }
+  .mark .glyph { width:30px; height:30px; }
+  .title { font-size:104px; font-weight:800; letter-spacing:-.02em; line-height:1; color:#e6e9f4; margin-top:30px; }
+  .tag { font-size:44px; font-weight:600; color:#bac2de; margin-top:26px; }
+  .tag .v { color:#cba6f7; }
+  .sub { font-size:23px; line-height:1.55; color:#7f849c; max-width:940px; margin-top:22px; }
+  .sub b { color:#a6adc8; font-weight:600; }
+  .prompt { font-size:21px; color:#9399b2; margin-top:8px; }
+  .prompt .sym { color:#cba6f7; }
+  .prompt .cur { background:#cba6f7; color:#14141f; padding:0 3px; }
+  .footer {
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid #313244; padding-top:24px;
+    font-family:ui-monospace,"SF Mono","Menlo",monospace;
+    font-size:19px; color:#6c7086;
+  }
+  .footer .repo { color:#9399b2; }
+</style>
+</head>
+<body>
+  <div>
+    <div class="mark">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#cba6f7" stroke-width="2" stroke-linecap="round">
+        <path d="M3 7h18M3 12h18M3 17h18"/><path d="M8 3v18M16 3v18" opacity="0.5"/>
+      </svg>
+      <span class="kicker">Markdown-native agent memory · MCP</span>
+    </div>
+    <div class="title">TheWeave</div>
+  </div>
+
+  <div>
+    <div class="tag">Memory you can <span class="v mono">cat</span>, <span class="v mono">grep</span>, and <span class="v mono">git</span>.</div>
+    <div class="sub">Your agent's memory lives as plain <b>.md</b> files in a directory you own. No database, no embeddings server. Query-driven retrieval, bi-temporal facts, persona-as-vault. Works with <b>Claude</b> and any MCP-aware agent.</div>
+  </div>
+
+  <div>
+    <div class="prompt mono"><span class="sym">$</span> weave-cli boot "what changed since the cutover?"<span class="cur"> </span></div>
+    <div class="footer">
+      <span class="repo">github.com/TheWeaveSC/theweave</span>
+      <span>Apache-2.0 · Python 3.11+</span>
+    </div>
+  </div>
+</body>
+</html>
