@@ -7,6 +7,10 @@
 
 **Claude memory you can `cat`, grep, and git.**
 
+<p align="center">
+  <img src="docs/theweave-demo.gif" alt="TheWeave demo — query-driven memory retrieval over a plain markdown vault" width="100%">
+</p>
+
 A markdown-native memory architecture for Claude and any MCP-aware agent. Your assistant's memory lives as plain `.md` files in a directory you own — inspectable in your text editor, versionable in git, portable across machines — not in an opaque vector database somewhere else.
 
 Five composable patterns sit on top of the same vault:
