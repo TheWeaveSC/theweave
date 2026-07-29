@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "theweave"
+version = "0.2.0"
+description = "The Weave 2.0 — markdown-native agentic AI memory architecture. Five-pattern engine over a plain-markdown vault, exposed via the Model Context Protocol."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [
+  { name = "TheWeaveSC" }
+]
+keywords = [
+  "memory",
+  "mcp",
+  "model-context-protocol",
+  "claude",
+  "anthropic",
+  "agent",
+  "rag",
+  "bi-temporal",
+  "knowledge-graph",
+  "obsidian",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+  "mcp>=1.0",
+  "networkx>=3.0",
+  "python-frontmatter>=1.0",
+  "click>=8.0",
+  "pydantic>=2.0",
+  "numpy>=1.24",
+  "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.30"]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "ruff>=0.4",
+]
+
+[project.scripts]
+weave-cli = "weave.cli:main"
+weave-mcp-server = "weave.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/TheWeaveSC/theweave"
+Repository = "https://github.com/TheWeaveSC/theweave"
+Issues = "https://github.com/TheWeaveSC/theweave/issues"
+
+[tool.setuptools.packages.find]
+include = ["weave*"]
+exclude = ["tests*", "seed-vault*", "docs*"]

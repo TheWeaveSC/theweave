@@ -1,0 +1,52 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode + build artefacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+
+# Test + coverage caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE + editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Private scrub-term list for the installer no-personal-content test
+tests/scrub_terms.local.txt
+
+# Local archive folders (consolidator + tests create these)
+_archive/
+seed-vault/_archive/
+
+# Local user state (logs, scratch)
+*.log
+scratch/
