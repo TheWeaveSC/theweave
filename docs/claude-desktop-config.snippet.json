@@ -1,11 +1,11 @@
 {
   "_comment_1": "Add the entry under `mcpServers` in your existing claude_desktop_config.json. Restart Claude Desktop after editing.",
-  "_comment_2": "Config file location on macOS: ~/Library/Application Support/Claude/claude_desktop_config.json",
+  "_comment_2": "Config file location — macOS: ~/Library/Application Support/Claude/claude_desktop_config.json | Windows: %APPDATA%\\Claude\\claude_desktop_config.json | Linux: ~/.config/Claude/claude_desktop_config.json",
   "_comment_3": "After install + restart, the 5 tools appear in Claude Desktop as: weave-core/view, weave-core/create, weave-core/str_replace, weave-core/insert, weave-core/delete",
 
   "mcpServers": {
     "weave-core": {
-      "command": "/path/to/your/weave-2.0-sandbox/.venv/bin/python",
+      "command": "/path/to/your/theweave/venv/bin/python",
       "args": ["-m", "weave.mcp_server"],
       "env": {
         "WEAVE_VAULT_PATH": "/path/to/your/markdown/vault"
@@ -14,10 +14,10 @@
   },
 
   "_setup_notes": [
-    "1. `command` — absolute path to the Python interpreter in your sandbox venv. Find it by running:  cd ~/weave-2.0-sandbox && echo $(pwd)/.venv/bin/python",
+    "1. `command` — absolute path to the Python interpreter in the venv where theweave is installed. macOS/Linux: ~/theweave/venv/bin/python. Windows: C:\\Users\\<you>\\theweave\\venv\\Scripts\\python.exe.",
     "2. `WEAVE_VAULT_PATH` — absolute path to the markdown vault directory you want Claude Desktop to read and write. Can be any subtree containing your notes.",
     "3. Apple's iCloud Drive paths look like:  /Users/<you>/Library/Mobile Documents/com~apple~CloudDocs/Documents/<...> — these work fine as vault paths.",
-    "4. Restart Claude Desktop fully (Cmd-Q then reopen) after editing this file. MCP servers are loaded at launch.",
+    "4. Restart Claude Desktop fully (Cmd-Q on macOS / Quit from the tray on Windows, then reopen) after editing this file. MCP servers are loaded at launch.",
     "5. Smoke test: ask Claude something like 'use weave-core/view to list the directory at the vault root'. You should see your vault's top-level entries."
   ]
 }

@@ -4,9 +4,12 @@ STRICT CACHE SEMANTICS (I1): everything under the cortex dir is
 derived from (markdown, model, builder version) and rebuildable; deleting it
 loses speed, never memory. Markdown stays the single source of truth.
 
-Layout (per vault, resolved OUTSIDE the vault tree — I3):
+Layout (per vault, resolved OUTSIDE the vault tree — I3 — in the
+platform-native user cache dir: ~/Library/Caches/theweave on macOS,
+%LOCALAPPDATA%/theweave/cache on Windows, XDG_CACHE_HOME or
+~/.cache/theweave elsewhere):
 
-    ~/Library/Caches/theweave/<vault-id>/
+    <cache-base>/<vault-id>/
         manifest.json      derivation manifest (I2) — deterministic, no clocks
         dense.sqlite3      chunk store + sqlite-vec index          (W2)
         graph.json         wikilink graph + spectral embeddings    (W2)
@@ -28,6 +31,7 @@ import hashlib
 import json
 import os
 import shutil
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -58,17 +62,31 @@ def vault_id(vault: Vault) -> str:
     return hashlib.sha256(str(vault.root).encode("utf-8")).hexdigest()[:16]
 
 
+def _default_cache_base() -> Path:
+    """Platform-native per-user cache base for the cortex (never synced)."""
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Caches" / "theweave"
+    if sys.platform == "win32":
+        local = os.environ.get("LOCALAPPDATA")
+        base = Path(local) if local else Path.home() / "AppData" / "Local"
+        return base / "theweave" / "cache"
+    xdg = os.environ.get("XDG_CACHE_HOME")
+    return (Path(xdg) if xdg else Path.home() / ".cache") / "theweave"
+
+
 def cortex_dir(vault: Vault, *, create: bool = False) -> Path:
     """Resolve the cortex dir for a vault.
 
-    Default: ~/Library/Caches/theweave/<vault-id>/ — macOS-native cache
-    location, outside every iCloud-synced tree, excluded from Time Machine.
-    WEAVE_CORTEX_DIR overrides the BASE dir (tests, non-mac platforms); the
+    Default: the platform-native user cache dir + /theweave/<vault-id>/ —
+    outside every cloud-synced tree:
+      macOS:   ~/Library/Caches/theweave
+      Windows: %LOCALAPPDATA%/theweave/cache
+      Linux:   $XDG_CACHE_HOME/theweave (or ~/.cache/theweave)
+    WEAVE_CORTEX_DIR overrides the BASE dir (tests, unusual setups); the
     per-vault id subdir always applies so two vaults never share a cortex.
     """
     base = os.environ.get("WEAVE_CORTEX_DIR")
-    root = (Path(base).expanduser() if base
-            else Path("~/Library/Caches/theweave").expanduser())
+    root = Path(base).expanduser() if base else _default_cache_base()
     d = root / vault_id(vault)
     resolved = str(d.resolve())
     # I3 guards: never inside the vault tree, never inside an iCloud-synced

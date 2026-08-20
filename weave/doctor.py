@@ -429,7 +429,20 @@ def check_environment() -> CheckGroup:
 # ---------- group: MCP (optional) ----------
 
 def _claude_config_path() -> Path:
-    return Path.home() / "Library/Application Support/Claude/claude_desktop_config.json"
+    """Claude Desktop config location, per platform.
+
+    macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json
+    Windows: %APPDATA%\\Claude\\claude_desktop_config.json
+    Linux:   ~/.config/Claude/claude_desktop_config.json
+    """
+    if sys.platform == "darwin":
+        return (Path.home() / "Library" / "Application Support" / "Claude"
+                / "claude_desktop_config.json")
+    if sys.platform == "win32":
+        appdata = os.environ.get("APPDATA")
+        base = Path(appdata) if appdata else Path.home() / "AppData" / "Roaming"
+        return base / "Claude" / "claude_desktop_config.json"
+    return Path.home() / ".config" / "Claude" / "claude_desktop_config.json"
 
 
 def check_mcp() -> CheckGroup:

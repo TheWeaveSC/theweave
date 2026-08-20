@@ -471,8 +471,13 @@ def cortex_dream(day_str: str | None, brief_dir: str | None, dry_run: bool,
 @vault_option
 def cortex_install_nightly(hour: int, minute: int, uninstall: bool,
                            vault: str | None) -> None:
-    """Install (or remove) the launchd nightly dream job (macOS)."""
+    """Install (or remove) the launchd nightly dream job (macOS only)."""
     import subprocess
+    if sys.platform != "darwin":
+        click.echo("cortex install-nightly uses launchd and is macOS-only.\n"
+                   "On Windows/Linux, schedule `weave-cli cortex dream` with "
+                   "Task Scheduler or cron instead.", err=True)
+        sys.exit(1)
     from .pro.dreamer import launchd_plist, PLIST_LABEL
     plist_path = Path("~/Library/LaunchAgents").expanduser() / f"{PLIST_LABEL}.plist"
     if uninstall:
