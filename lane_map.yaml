@@ -1,0 +1,121 @@
+# lane_map.yaml — lane firewall configuration (public seed)
+#
+# Lives at the REPO ROOT, never inside your vault; it names files, never
+# quotes their content. To add a ruling: put the note's vault-relative path
+# under lanes.<lane>.explicit_files (or under quarantined_files if it must
+# never be retrievable at all), then run `weave-cli cortex rebuild` — a
+# cortex built under an older lane map is refused at read time.
+#
+# EVERYTHING BELOW IS EXAMPLE CONTENT, invented for the synthetic demo vault
+# at tests/fixtures/lane-vault/ (a fictional cast — no real people, firms,
+# files, or dates). Replace the examples with your own rulings before
+# relying on the firewall for real separation.
+#
+# Resolution order (weave/pro/dense.py::lane_of, first match wins):
+#   1. explicit_files   — exact rel_path, then basename (wiki mirrors
+#                         inherit their source note's lane 1:1)
+#   2. filename_globs   — case-insensitive glob on the basename
+#   3. dir_prefixes     — longest matching directory prefix
+#   4. learninglayer    — vocabulary majority count (ties -> operational)
+#   5. default_lane
+#
+# Lane NAMES are currently fixed in code (weave/pro/dense.py::LANES):
+# "thesis" (the example of a sensitive-project lane), "operational",
+# "neutral" (visible from every lane).
+
+default_lane: operational
+
+lanes:
+  thesis:
+    explicit_files:
+      - "HomeVault/Draft Manuscript.md"
+      - "HomeVault/sessions/2025-03-04-methods-workshop.md"
+      - "HomeVault/sessions/2025-04-11-draft-review.md"
+      - "LearningLayer/signals-2025-03-30-writing-cadence.md"
+      - "HomeVault/entities/entity-Track-East.md"
+      - "HomeVault/entities/entity-Track-West.md"
+    filename_globs:
+      - "*thesis*"
+    dir_prefixes: []
+
+  operational:
+    explicit_files:
+      - "HomeVault/career/annual-review-notes.md"
+      - "HomeVault/entities/entity-DanaVo.md"
+      - "HomeVault/entities/entity-Mira.md"
+      - "HomeVault/entities/entity-Project-Warehouse-Rollout.md"
+      - "wiki/people/Dana.md"
+    filename_globs:
+      - "*client-omega*"
+      - "*omega-fm*"
+    dir_prefixes:
+      - "HomeVault/career/"
+
+  neutral:
+    explicit_files:
+      - "HomeVault/SESSION-NOTES-INDEX.md"
+      - "BOOT.md"
+      - "wiki/concepts/TheWeave-2.0.md"
+    filename_globs: []
+    dir_prefixes:
+      - "HomeVault/team/"
+      - "wiki/concepts/"
+
+# Hub files: excluded from the dense index and never PPR-seeded (they link
+# everything, so seeding them floods every query). Exact rel_path match.
+dense_excluded_files:
+  - "HomeVault/SESSION-NOTES-INDEX.md"
+  - "BOOT.md"
+  - "wiki/concepts/TheWeave-2.0.md"
+
+# Quarantined files: never embedded, never seeded, never returned from
+# recall in ANY lane — for "bridge" files whose CONTENT joins two identities
+# that must stay separated (e.g. a pseudonym<->real-name crosswalk). The
+# vault files themselves stay untouched.
+quarantined_files:
+  - "HomeVault/entities/entity-DanaVo.md"
+  - "wiki/people/Dana.md"
+  - "HomeVault/entities/entity-AtlasERP.md"
+  - "HomeVault/entities/entity-Mira.md"
+  - "_archive/consolidation-2025-04-05-0910.md"
+  - "_archive/consolidation-2025-04-05-1120.md"
+  - "_archive/consolidation-2025-04-05-1330.md"
+  - "_archive/consolidation-2025-05-01-0800.md"
+  - "LearningLayer/signals-2025-04-02.md"
+  # A ruling may pin a path with no file on disk — keep the pin; it costs
+  # nothing and survives file restores:
+  - "LearningLayer/signals-2025-05-06-lane-review-notes.md"
+
+# Build-time bridge detector (fail-closed): a note matching at least one
+# term from BOTH lists — and neither explicitly ruled nor quarantined —
+# ABORTS `cortex rebuild` until a human rules it. Put your code-names in one
+# list and the real names they stand for in the other; leave both empty to
+# disable. Example terms (fictional):
+bridge_vocab:
+  pseudonym_vocab:
+    - "Firm Alpha"
+    - "Firm Beta"
+    - "Logistics Lead"
+  realname_vocab:
+    - "Dana"
+    - "Atlas"
+    - "Mira"
+    - "Northwind Power Group"
+    - "Westgate"
+    - "Summit Energy"
+
+# LearningLayer signal files serve both lanes; classify each by which lane's
+# vocabulary dominates its text (ties -> operational). Example vocab:
+learninglayer:
+  dir_prefix: "LearningLayer/"
+  vocab:
+    thesis:
+      - "codebook"
+      - "fieldwork"
+      - "defence"
+      - "advisor"
+    operational:
+      - "shipment"
+      - "warranty"
+      - "quotation"
+      - "downtime"
