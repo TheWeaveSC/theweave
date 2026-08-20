@@ -40,9 +40,16 @@ desktop.ini
 .env.local
 .env.*.local
 
-# Local archive folders (consolidator + tests create these)
+# Private scrub-term list for the repo no-personal-content test
+tests/scrub_terms.local.txt
+
+# Local archive folders (consolidator + tests create these at runtime)...
 _archive/
 seed-vault/_archive/
+# ...but the committed lane-vault quarantine fixtures under _archive/ MUST
+# stay tracked — without them the bridge-quarantine tests would run against
+# a vault with no archive rollups and pass vacuously on every fresh clone.
+!tests/fixtures/lane-vault/_archive/
 
 # Local user state (logs, scratch)
 *.log

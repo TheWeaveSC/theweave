@@ -89,7 +89,7 @@ class BiTemporalResolver:
     def current_entities(self) -> Iterator[Note]:
         """Yield every entity note that is currently valid (no superseded_by)."""
         for note in self.vault.iter_notes():
-            if note.metadata.get("type") in ("entity", "project", "person", "stakeholder", "research-project"):
+            if note.metadata.get("type") in ("entity", "project", "person", "stakeholder", "research-project", "agent"):
                 if not note.metadata.get("superseded_by"):
                     yield note
 

@@ -118,7 +118,7 @@ Iterate the rules until the fallthrough is zero or contains only stuff you genui
 python tools/migrate_obsidian.py --apply --dest ~/Documents/<your-vault>-v2
 ```
 
-The script **refuses to overwrite** an existing destination — pick a fresh sibling path (the recommended naming pattern is `<original>-v2/`, mirroring TheWeave's own MiniSonnet/AirSonnet migrations). Production vault stays untouched until you declare cutover.
+The script **refuses to overwrite** an existing destination — pick a fresh sibling path (the recommended naming pattern is `<original>-v2/`, mirroring TheWeave's own internal migrations). Production vault stays untouched until you declare cutover.
 
 ### 6. Doctor the result
 

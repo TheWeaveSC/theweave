@@ -2,7 +2,7 @@
 
 Used when ANTHROPIC_API_KEY is unset. Keeps the sandbox runnable end-to-end
 without any network or API dependency. Clearly labelled as MOCK in all
-outputs so SC isn't fooled into thinking these are model-quality decisions.
+outputs so the user isn't fooled into thinking these are model-quality decisions.
 
 Replace with weave.pro.anthropic_llm at runtime when an API key is present.
 """
@@ -108,7 +108,7 @@ def reflect_signals(signals: list[str]) -> str:
     """Synthesize raw signals into higher-order patterns.
 
     Mock heuristic: cluster signals by leading bullet/heading and emit a
-    template summary. Marks output as MOCK so SC isn't fooled.
+    template summary. Marks output as MOCK so the user isn't fooled.
     """
     if not signals:
         return "[MOCK] No signals to reflect on."

@@ -5,7 +5,7 @@ signatures as weave.pro.mock_llm so the consumer code can swap at runtime.
 
 Sandbox DOES NOT pre-install the anthropic SDK. Import is lazy so the module
 loads cleanly even without the package present; calling a function without
-the SDK installed raises a clear error directing SC to `pip install anthropic`.
+the SDK installed raises a clear error directing the user to `pip install anthropic`.
 """
 
 from __future__ import annotations

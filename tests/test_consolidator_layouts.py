@@ -95,8 +95,8 @@ def test_consolidator_tolerates_same_day_sessions(tmp_path: Path) -> None:
 
 def test_path_contains_dir_helper() -> None:
     assert _path_contains_dir("sessions/foo.md", "sessions")
-    assert _path_contains_dir("AirVault/sessions/foo.md", "sessions")
+    assert _path_contains_dir("HomeVault/sessions/foo.md", "sessions")
     assert _path_contains_dir("a/b/sessions/c.md", "sessions")
     assert not _path_contains_dir("sessions-archive/foo.md", "sessions")
-    assert not _path_contains_dir("AirVault/sessionsfoo.md", "sessions")
+    assert not _path_contains_dir("HomeVault/sessionsfoo.md", "sessions")
     assert not _path_contains_dir("entities/foo.md", "sessions")

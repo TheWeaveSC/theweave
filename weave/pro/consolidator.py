@@ -29,6 +29,38 @@ from ..vault import Note, Vault, WIKILINK_RE
 from .bitemporal import BiTemporalResolver
 from .llm import get_llm, is_mock
 
+# Type allowlist for LearningLayer signal notes. Resolved against the real
+# vaults: every signal file carries `type: learning-signals` (exclusive; the
+# literal `agent-learning` does not appear in any vault). Locked to this single
+# type — widen here if a new signal type is ever introduced.
+SIGNAL_TYPES: frozenset[str] = frozenset({"learning-signals"})
+
+
+def signal_files(vault: Vault) -> list[Note]:
+    """Public: every LearningLayer note whose type is in SIGNAL_TYPES.
+
+    Sorted by rel_path: iter_notes() inherits filesystem (rglob) order, which
+    is not canonical across machines — byte-stable consumers (hydrate) need a
+    deterministic order.
+    """
+    return sorted(
+        (n for n in vault.iter_notes()
+         if _path_contains_dir(n.rel_path, "LearningLayer")
+         and n.metadata.get("type") in SIGNAL_TYPES),
+        key=lambda n: n.rel_path,
+    )
+
+
+def extract_signal_lines(signal_files: list[Note]) -> list[str]:
+    """Public: pull the `- ...` bullet lines out of a set of signal notes."""
+    signals: list[str] = []
+    for n in signal_files:
+        for ln in n.content.splitlines():
+            ln = ln.strip()
+            if ln.startswith("- "):
+                signals.append(ln[2:].strip())
+    return signals
+
 
 @dataclass
 class EntityPatch:
@@ -132,9 +164,8 @@ class Consolidator:
         return names
 
     def _signal_files(self) -> list[Note]:
-        return [n for n in self.vault.iter_notes()
-                if _path_contains_dir(n.rel_path, "LearningLayer")
-                and n.metadata.get("type") == "learning-signals"]
+        """Backward-compat alias for the public module-level signal_files()."""
+        return signal_files(self.vault)
 
     # ---------- build report ----------
 
@@ -190,35 +221,83 @@ class Consolidator:
         return "\n".join(lines)
 
     @staticmethod
-    def _extract_signal_lines(signal_files: list[Note]) -> list[str]:
-        signals: list[str] = []
-        for n in signal_files:
-            for ln in n.content.splitlines():
-                ln = ln.strip()
-                if ln.startswith("- "):
-                    signals.append(ln[2:].strip())
-        return signals
+    def _extract_signal_lines(files: list[Note]) -> list[str]:
+        """Backward-compat alias for the public module-level extract_signal_lines()."""
+        return extract_signal_lines(files)
 
     # ---------- apply ----------
 
     def apply(self, report: ConsolidationReport) -> list[str]:
-        """Patch entity files with backups. Returns list of patched paths."""
+        """Patch entity files with backups. Returns list of patched paths.
+
+        Multi-file batch safety (v1): the FULL patch set (with pre/post
+        content hashes) is journalled as ONE pending intent record under the
+        cortex dir before the loop touches any file, and marked completed
+        only after every target is patched. A mid-batch death leaves the
+        record pending — `weave doctor` flags it and lists patched vs
+        unpatched targets and the backups to restore.
+        """
+        from ..vault import content_hash
+        from . import intent_journal
+
         patched: list[str] = []
         stamp = report.generated_at.strftime("%Y-%m-%d-%H%M")
         archive_dir = self.vault.root / "_archive"
         archive_dir.mkdir(parents=True, exist_ok=True)
+
+        # Pre-compute every target's patched content so the intent record can
+        # carry pre/post hashes for the WHOLE batch up front.
+        planned: list[tuple[EntityPatch, Path, Path, str]] = []
+        targets: list[intent_journal.IntentTarget] = []
         for patch in report.patches:
             ent_path = self.vault.root / patch.entity_path
             if not ent_path.exists():
                 continue
-            # backup
             backup = archive_dir / f"{Path(patch.entity_path).stem}-{stamp}.md"
-            shutil.copy2(ent_path, backup)
-            # patch — append or replace existing "Recent activity" section
             text = ent_path.read_text(encoding="utf-8")
             new_text = _replace_or_append_section(text, "## Recent activity", patch.proposed_block)
+            planned.append((patch, ent_path, backup, new_text))
+            targets.append(intent_journal.IntentTarget(
+                rel_path=patch.entity_path,
+                pre_hash=content_hash(text),
+                post_hash=content_hash(new_text),
+                backup_rel_path=self.vault.rel(backup),
+            ))
+
+        # Journal the intent BEFORE any file is touched. Fail-open: a broken
+        # cortex dir must not block consolidation — it only costs the safety
+        # net, loudly.
+        intent_path: Path | None = None
+        if targets:
+            try:
+                intent_path = intent_journal.write_intent(self.vault, targets)
+            except Exception as e:
+                import sys
+                print(f"[weave consolidator] intent journal unavailable "
+                      f"({type(e).__name__}: {e}) — applying WITHOUT "
+                      f"mid-batch crash detection.", file=sys.stderr)
+
+        for patch, ent_path, backup, new_text in planned:
+            shutil.copy2(ent_path, backup)
             ent_path.write_text(new_text, encoding="utf-8")
             patched.append(patch.entity_path)
+
+        if intent_path is not None:
+            # Same fail-open contract as write_intent: after a fully
+            # successful loop, a journal that turned unwritable must not make
+            # apply() raise (losing the return value and skipping the report
+            # write below). The stale pending record it leaves behind shows
+            # every target patched; doctor words that as "journal not
+            # finalized" rather than a partial apply.
+            try:
+                intent_journal.mark_completed(intent_path)
+            except Exception as e:
+                import sys
+                print(f"[weave consolidator] could not finalize intent record "
+                      f"{intent_path} ({type(e).__name__}: {e}) — apply "
+                      f"succeeded; doctor will report it as not finalized.",
+                      file=sys.stderr)
+
         # write the report
         report_path = archive_dir / f"consolidation-{stamp}.md"
         report_path.write_text(report.to_markdown(), encoding="utf-8")

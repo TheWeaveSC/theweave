@@ -320,6 +320,73 @@ def check_vault(vault_path: str | None) -> CheckGroup:
     except Exception as e:
         g.add("p2-graph", FAIL, f"Pattern 2 graph build failed: {type(e).__name__}: {e}")
 
+    # Batch-apply intent journal (consolidator crash safety): a pending
+    # intent record older than a few minutes means an apply died mid-batch —
+    # some targets patched, some not, with no error anywhere. Report which is
+    # which (current file hash vs recorded pre/post hashes) and which backups
+    # to restore. Doctor REPORTS; it never auto-restores.
+    try:
+        from .pro.intent_journal import intents_dir, stale_pending
+        journal_dir = intents_dir(vault)
+        stale = stale_pending(vault)
+    except Exception as e:
+        g.add("batch-apply", WARN,
+              f"Intent journal location unresolvable: {type(e).__name__}: {e}",
+              detail="Mid-batch crash detection is unavailable on this machine.")
+        journal_dir = None
+        stale = []
+
+    def _record_detail(rec) -> list[str]:
+        out = [f"intent {rec.intent_path.name} (created {rec.created_at}):"]
+        for t in rec.targets:
+            if t.state == "patched":
+                out.append(f"  patched:   {t.rel_path}"
+                           + (f" (backup: {t.backup_rel_path})" if t.backup_rel_path else ""))
+            elif t.state == "unpatched":
+                out.append(f"  UNPATCHED: {t.rel_path}")
+            else:
+                out.append(f"  {t.state}: {t.rel_path}"
+                           + (f" (backup: {t.backup_rel_path})" if t.backup_rel_path else ""))
+        return out
+
+    # Split the stale records: every-target-patched means the apply FINISHED
+    # but mark_completed failed (journal not finalized) — nothing to restore,
+    # so WARN. FAIL is reserved for actual vault inconsistency (some targets
+    # patched, some not) that needs operator action on vault files.
+    partial = [r for r in stale if not r.all_patched()]
+    unfinalized = [r for r in stale if r.all_patched()]
+
+    if journal_dir is not None and journal_dir.exists() and not journal_dir.is_dir():
+        # A broken journal location must never read as a green safety net —
+        # stale_pending() legitimately finds nothing there.
+        g.add("batch-apply", WARN,
+              f"Intent journal location is not a directory: {journal_dir}",
+              detail="Mid-batch crash detection cannot record or read intents "
+                     "there. Remove or rename the blocking file.")
+    elif partial:
+        details: list[str] = []
+        for rec in partial:
+            details.extend(_record_detail(rec))
+        details.append("To roll back, restore each patched target from its backup, "
+                       "then delete or complete the intent record. Doctor never auto-restores.")
+        g.add("batch-apply", FAIL,
+              f"Partial batch apply detected — {len(partial)} pending intent record(s) "
+              "from a consolidator run that died mid-batch",
+              detail="\n".join(details))
+    elif unfinalized:
+        details = []
+        for rec in unfinalized:
+            details.extend(_record_detail(rec))
+        details.append("Every target shows its recorded post-state — nothing to "
+                       "restore. Delete the intent record(s) to clear this. "
+                       "Doctor never auto-restores.")
+        g.add("batch-apply", WARN,
+              f"Batch apply completed but journal not finalized — "
+              f"{len(unfinalized)} pending intent record(s) with all targets patched",
+              detail="\n".join(details))
+    else:
+        g.add("batch-apply", PASS, "No stale batch-apply intents (no partial applies)")
+
     # Bi-temporal coverage
     if bi_temporal_total:
         pct = 100 * bi_temporal_full / bi_temporal_total

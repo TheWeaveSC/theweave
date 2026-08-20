@@ -1,0 +1,100 @@
+# Cortex W0 probe set — runs against tests/fixtures/bench-vault/.
+# Fully synthetic; categories mirror LongMemEval at the retrieval level.
+
+# ---------- single-hop: one note holds the answer ----------
+- id: sh-01
+  category: single-hop
+  query: What firmware version runs on the Lighthouse v2 buoys?
+  gold: [session-2026-02-11-lighthouse-v2-cutover, entity-Project-Lighthouse-v2]
+- id: sh-02
+  category: single-hop
+  query: What bug does the Orchard barcode scanner have?
+  gold: [session-2026-04-15-orchard-barcode-bug, entity-Project-Orchard]
+- id: sh-03
+  category: single-hop
+  query: What is Skyfield's standard lead time for LoRa modules?
+  gold: [entity-Vendor-Skyfield, session-2026-05-02-skyfield-order]
+- id: sh-04
+  category: single-hop
+  query: Which pier suffered the CRC error bursts?
+  gold: [session-2026-01-20-lighthouse-radio-fault]
+- id: sh-05
+  category: single-hop
+  query: What did Marina ask for in the May stakeholder review?
+  gold: [session-2026-05-20-marina-review]
+- id: sh-06
+  category: single-hop
+  query: How many LoRa modules were ordered for the buoy spares pool?
+  gold: [session-2026-05-02-skyfield-order]
+
+# ---------- associative: answer requires following a link hop ----------
+- id: as-01
+  category: associative
+  query: Which archived project produced data that informed buoy placement?
+  gold: [entity-Project-Kestrel, harbor-telemetry]
+- id: as-02
+  category: associative
+  query: Who supplies the radios that replaced the 900MHz link?
+  gold: [entity-Vendor-Skyfield]
+- id: as-03
+  category: associative
+  query: Which team builds the project that Petros sponsors?
+  gold: [entity-Team-Cobalt]
+- id: as-04
+  category: associative
+  query: Which stakeholder received the Kestrel bathymetry maps and also signed off the v2 acceptance run?
+  gold: [entity-Marina]
+- id: as-05
+  category: associative
+  query: What delivery is blocking the Lighthouse spares pool according to the June retro?
+  gold: [session-2026-06-10-cobalt-retro, session-2026-05-02-skyfield-order]
+
+# ---------- temporal: answer lives in a superseded version or a dated event ----------
+- id: tp-01
+  category: temporal
+  query: What radio link did Lighthouse use before the LoRa migration?
+  gold: [entity-Project-Lighthouse, session-2025-09-14-lighthouse-kickoff]
+- id: tp-02
+  category: temporal
+  query: When was the decision made to migrate the radio layer to LoRa?
+  gold: [session-2026-01-20-lighthouse-radio-fault]
+- id: tp-03
+  category: temporal
+  query: How many buoys did Lighthouse have at the original kickoff?
+  gold: [session-2025-09-14-lighthouse-kickoff, entity-Project-Lighthouse]
+- id: tp-04
+  category: temporal
+  query: As of January 2026, which Lighthouse version was current?
+  gold: [entity-Project-Lighthouse]
+
+# ---------- knowledge-update: an old fact was replaced; current answer wins ----------
+- id: ku-01
+  category: knowledge-update
+  query: What is the current name of the beacon.port config key?
+  gold: [session-2026-06-01-beacon-migration, entity-Tool-Beacon]
+- id: ku-02
+  category: knowledge-update
+  query: Which Lighthouse entity version is current?
+  gold: [entity-Project-Lighthouse-v2]
+- id: ku-03
+  category: knowledge-update
+  query: What replaced the proprietary 900MHz radio on the buoys?
+  gold: [entity-Project-Lighthouse-v2, session-2026-02-11-lighthouse-v2-cutover]
+
+# ---------- abstention: the vault does not know; retriever should not pretend ----------
+- id: ab-01
+  category: abstention
+  query: What is Petros's home address?
+  gold: []
+- id: ab-02
+  category: abstention
+  query: Which cloud provider hosts the Orchard backups?
+  gold: []
+- id: ab-03
+  category: abstention
+  query: Who won the 2026 Callowmere regatta?
+  gold: []
+- id: ab-04
+  category: abstention
+  query: What is the wifi password at the pier station office?
+  gold: []

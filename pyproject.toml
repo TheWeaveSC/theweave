@@ -39,13 +39,15 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-  "mcp>=1.0",
+  "mcp>=1.0,<2",  # mcp 2.0.0 removed mcp.server.fastmcp — fresh installs break (repro 2026-08-19, 1.29.0 clean)
   "networkx>=3.0",
   "python-frontmatter>=1.0",
   "click>=8.0",
   "pydantic>=2.0",
   "numpy>=1.24",
   "scipy>=1.10",
+  "sqlite-vec>=0.1.6",
+  "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]

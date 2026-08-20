@@ -27,6 +27,32 @@ _STOPWORDS = {"the", "and", "for", "you", "are", "with", "from", "this", "that",
               "office", "project", "coverage"}
 
 
+def match_entity_names(query: str, names) -> list[str]:
+    """THE entity-mention matching policy, shared by the boot retriever and
+    hybrid recall so the two paths can never drift apart on what counts as an
+    entity mention. `names` is any iterable of note names."""
+    q = " " + query.lower() + " "
+    seeds: list[str] = []
+    seen: set[str] = set()
+    for name in names:
+        base = name.lower()
+        if base.startswith(("session-", "signals-")):
+            continue
+        stripped = re.sub(r"^(entity-)", "", base)
+        tokens: list[str] = [stripped]
+        for tok in re.split(r"[-_\s/]+", stripped):
+            tok = tok.strip()
+            if len(tok) >= 3 and tok not in _STOPWORDS:
+                tokens.append(tok)
+        for tok in tokens:
+            if re.search(rf"\b{re.escape(tok)}\b", q):
+                if name not in seen:
+                    seeds.append(name)
+                    seen.add(name)
+                break
+    return seeds
+
+
 @dataclass
 class BootResult:
     """Output of a PPR boot retrieval."""
@@ -51,7 +77,12 @@ class PPRBoot:
     def build(self) -> nx.DiGraph:
         """Build (or rebuild) the wikilink graph. Nodes = note names; edges = wikilinks."""
         g = nx.DiGraph()
-        notes = list(self.vault.iter_notes())
+        # Safe walk (2026-08-13): PPRBoot IS the degraded fallback recall()
+        # drops to when the cortex or embedder is unavailable. A fallback that
+        # crashes on a malformed note is not a fallback — it turns a
+        # recoverable outage into a dead read path. Faults are surfaced by
+        # `weave vault lint` / doctor, not silently absorbed here.
+        notes, self.faults = self.vault.iter_notes_safe()
         self._notes_by_name = {n.name: n for n in notes}
         for n in notes:
             g.add_node(n.name, type=n.metadata.get("type", "note"), path=n.rel_path)
@@ -76,27 +107,7 @@ class PPRBoot:
         """
         if self._graph is None:
             self.build()
-        q = " " + query.lower() + " "
-        seeds: list[str] = []
-        seen: set[str] = set()
-        for name in self._notes_by_name:
-            base = name.lower()
-            if base.startswith(("session-", "signals-")):
-                continue
-            stripped = re.sub(r"^(entity-)", "", base)
-            # Build candidate tokens: full stripped form + individual tokens
-            tokens: list[str] = [stripped]
-            for tok in re.split(r"[-_\s/]+", stripped):
-                tok = tok.strip()
-                if len(tok) >= 3 and tok not in _STOPWORDS:
-                    tokens.append(tok)
-            for tok in tokens:
-                if re.search(rf"\b{re.escape(tok)}\b", q):
-                    if name not in seen:
-                        seeds.append(name)
-                        seen.add(name)
-                    break
-        return seeds
+        return match_entity_names(query, self._notes_by_name)
 
     # ---------- PPR ----------
 
