@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-08-20
+
 ### Added
+- **Lane firewall (fail-closed).** Notes are routed into retrieval lanes via a repo-root `lane_map.yaml` (explicit rulings > filename globs > dir prefixes > LearningLayer vocabulary > default); recall, dense search, and PPR seeding are all lane-filtered, hub files are never embedded or seeded, and quarantined bridge files are never retrievable in any lane. Bridge detection is fail-closed (H1–H4): `cortex rebuild` REFUSES to build when an unruled note matches both bridge-vocab lists, the lane-config hash is stamped into the cortex manifest and stale caches are refused at read time, quarantined files are dropped as graph nodes entirely, and seeds are lane-filtered before PageRank on both the main and degraded paths.
+- **Cortex w2.4 read-path hardening.** Malformed-note survivability: one broken note degrades that note only — the read path reports the fault instead of dying (or silently hiding it) — and quarantine exclusion is enforced at every retrieval seam.
+- **`weave lint`** — vault lint verb (`weave-cli lint`, `--paths` for machine-readable output).
+- **Deterministic conflict pre-filter** — TF-IDF similarity pre-filter in front of conflict verdicts, so unrelated writes skip the LLM entirely.
+- **Advisory write gate on MCP write verbs** — `create` / `str_replace` / `insert` / `delete` get an advisory conflict proposal appended to their result (fail-open: gate errors never block the write; disable with `WEAVE_WRITE_GATE=0`).
+- **Windows support (beta).** Platform-aware Claude Desktop config-path resolution (macOS / `%APPDATA%` / XDG), platform-native cortex cache locations, `install-weave.ps1` PowerShell installer, and a clear macOS-only guard on the launchd nightly installer. Implemented and code-reviewed, not yet field-tested on Windows — feedback invited via issues.
+- New engine test suites: lane firewall, bridge quarantine, seed lane purity, read-path faults, write gate, lint, conflict pre-filter, hydrate, cortex, bench.
 - **`tools/migrate_obsidian.py`** — Obsidian-to-TheWeave migration tool. Reads one or more source directories (an Obsidian-style vault plus optional auxiliary directories like an agent's identity home), applies a rule table of glob-pattern → destination-subdir + TheWeave type + filename strategy, filters auto-heal stubs and Obsidian escaped-dot duplicates, rewrites frontmatter with bi-temporal triple + `origin_path` back-reference, preserves wikilinks and body verbatim. `--dry-run` mode prints a per-rule report without writing. Validated end-to-end against an existing 548-note Obsidian vault plus a 250+-file agent home — produced a 663-note TheWeave-shaped vault, doctor green, 100% bi-temporal coverage.
 - **[`docs/migrate-from-obsidian.md`](docs/migrate-from-obsidian.md)** — reusable migration recipe. When to migrate, audit → sample → rules → dry-run → apply → doctor → hand-finish → cutover. Includes a worked example with per-rule outcomes from a real migration.
+
+### Fixed
+- **`mcp>=1.0,<2` dependency pin** — mcp 2.0.0 removed `mcp.server.fastmcp`, breaking every fresh install; pinned to the 1.x line.
 
 ## [0.3.0] — 2026-05-28
 
@@ -52,7 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Anthropic Claude live-mode path for Patterns 4 and 5 via `ANTHROPIC_API_KEY`; deterministic mock mode by default.
 - Apache 2.0 license.
 
-[Unreleased]: https://github.com/TheWeaveSC/theweave/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/TheWeaveSC/theweave/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.4.0
 [0.3.0]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.3.0
 [0.2.0]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.2.0
 [0.1.1]: https://github.com/TheWeaveSC/theweave/releases/tag/v0.1.1

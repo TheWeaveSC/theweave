@@ -2,7 +2,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.3.0-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.4.0-orange.svg)](CHANGELOG.md)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io)
 
 **Claude memory you can `cat`, grep, and git.**
@@ -22,6 +22,15 @@ Five composable patterns sit on top of the same vault:
 5. **Write-time conflict resolver** — k-NN + LLM verdict refuses to ADD a duplicate when an UPDATE is correct
 
 The substrate is just markdown and YAML frontmatter. No services, no embeddings DB, no Ollama. The 5-verb tool ships zero-infra; the richer patterns layer on top of the same files.
+
+**New in v0.4.0:**
+
+- **Lane firewall (fail-closed)** — route notes into retrieval lanes via [`lane_map.yaml`](lane_map.yaml); cross-lane leakage is blocked at every seam (dense search, PPR seeding, recall), bridge files matching both vocab lists abort the build until a human rules them, and a lane-config hash gate refuses stale caches.
+- **Cortex read-path hardening** — one malformed note degrades that note only; faults are reported, never hidden; quarantined files are unretrievable in any lane.
+- **`weave lint`** — vault lint verb with machine-readable `--paths` output.
+- **Deterministic conflict pre-filter** — unrelated writes skip the LLM verdict entirely.
+- **Advisory write gate** — MCP write verbs append an advisory conflict proposal (fail-open; `WEAVE_WRITE_GATE=0` kill switch).
+- **Windows support (beta)** — see [Windows (beta)](#windows-beta).
 
 ---
 
@@ -51,7 +60,7 @@ A healthy install looks like:
   ✓ Dependencies importable
       mcp 1.27.1, networkx 3.6.1, frontmatter 1.3.0, click 8.4.1, ...
   ✓ CLI + MCP entry points importable
-  ℹ theweave 0.3.0
+  ℹ theweave 0.4.0
 
 [Vault]
   ✓ Vault root resolves: ~/theweave/seed-vault
@@ -197,9 +206,19 @@ Downloads the tagged release tarball, sets up a Python venv at `~/theweave/venv/
 
 Overridable via env vars: `WEAVE_VERSION`, `WEAVE_HOME`, `PYTHON`. See [`install-weave.sh`](install-weave.sh).
 
+### Windows (beta)
+
+v0.4.0 adds Windows support: platform-aware Claude Desktop config-path resolution (`%APPDATA%\Claude\claude_desktop_config.json`), platform-native cortex cache locations (`%LOCALAPPDATA%\theweave\cache`), and a PowerShell installer:
+
+```powershell
+irm https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.ps1 | iex
+```
+
+Honest label: the Windows path is **implemented and code-reviewed, but not yet field-tested on Windows hardware**. If you run it, please report what you hit — good or bad — via [issues](https://github.com/TheWeaveSC/theweave/issues). Known scope limits: `cortex install-nightly` is macOS-only (launchd); use Task Scheduler to run `weave-cli cortex dream` nightly instead.
+
 ### MCP integration with Claude Desktop
 
-Copy `docs/claude-desktop-config.snippet.json` into your `~/Library/Application Support/Claude/claude_desktop_config.json` under `mcpServers`. Restart Claude Desktop. The 5 verbs become available as `weave-core/view`, `weave-core/create`, etc.
+Copy `docs/claude-desktop-config.snippet.json` into your Claude Desktop config under `mcpServers` — macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows: `%APPDATA%\Claude\claude_desktop_config.json`, Linux: `~/.config/Claude/claude_desktop_config.json`. Restart Claude Desktop. The 5 verbs become available as `weave-core/view`, `weave-core/create`, etc.
 
 ---
 
@@ -240,6 +259,16 @@ Honest list of what's rough:
 - **PPR runs over the whole graph per query**, not cached. Fine for vaults under ~1,000 notes; pre-compute and cache for larger ones.
 - **Consolidator's mock reflect step is keyword-bucketing.** Honest stub, not a substitute for the live-Claude reflect pass.
 - **Live LLM mode is Claude only.** No OpenAI / Gemini / Ollama backends — open for contribution.
+
+---
+
+## Open experiment rows
+
+Falsifiable questions we are actively running, in the open. Pre-registered protocols and replication attempts welcome — open an issue.
+
+| # | Question | Evidence so far | Status |
+|---|---|---|---|
+| 1 | **Conflict prefilter paraphrase blindness** — the TF-IDF prefilter misses paraphrase near-duplicates; does dense-embedding verdict scoring fix it? | Two-rig evidence: paraphrase near-duplicates score similarity 0.28–0.38 against the 0.35 threshold, so real duplicates slip past the prefilter | Open — pre-registered protocol welcome |
 
 ---
 
