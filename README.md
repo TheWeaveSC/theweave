@@ -99,8 +99,15 @@ Starter vaults shipped in this repo:
 
 - **[`seed-vault/`](seed-vault/)** — neutral fictional starter (ACME / FOO entities). Best for kicking the tires on the five patterns.
 - **[`personas/sonnet/`](personas/sonnet/)** — a starter built around a terse, audit-discipline Claude collaborator. Voice, working-style, and relationship scaffolding pre-wired. See [`personas/sonnet/README.md`](personas/sonnet/README.md) for the layout and fork instructions.
+- **A blank vault** — if neither starter fits (e.g. you don't want the demo ACME/FOO data or the `sonnet` persona's voice), just create the five folders and let Claude write into them from a plain-English description of what to remember:
+  ```bash
+  mkdir -p ~/my-vault/{entities,sessions,wiki,LearningLayer,_archive}
+  ```
+  Then point `WEAVE_VAULT_PATH` at it (see [MCP integration](#mcp-integration-with-claude-desktop) below) and ask Claude to write your first entity note.
 
 Or skip the starter and point TheWeave at any existing markdown directory — Obsidian, your notes repo, dotfiles. The engine adapts to whatever layout you have.
+
+**A note on what to put in a vault:** TheWeave stores whatever you write to it, in plain text, forever (until you delete it) — it has no built-in redaction. Before your first real session, decide what should never go in: for a business vault, that usually means customer/employee personal data (full names, ID numbers, phone numbers), per-customer pricing, and any login or API key. Describe those in general terms instead ("a customer asked about X") rather than writing the identifying details down.
 
 ---
 
@@ -219,6 +226,19 @@ Honest label: the Windows path is **implemented and code-reviewed, but not yet f
 ### MCP integration with Claude Desktop
 
 Copy `docs/claude-desktop-config.snippet.json` into your Claude Desktop config under `mcpServers` — macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows: `%APPDATA%\Claude\claude_desktop_config.json`, Linux: `~/.config/Claude/claude_desktop_config.json`. Restart Claude Desktop. The 5 verbs become available as `weave-core/view`, `weave-core/create`, etc.
+
+### MCP integration with Claude Code
+
+"Claude Code" refers to two different things, and they pick up MCP servers differently:
+
+- **The "Code" tab inside the Claude Desktop app.** This loads MCP servers from the same `claude_desktop_config.json` file as the regular chat tab (confirmed directly — it is not a separate config). If you've already done the step above, there's nothing more to do: restart Claude Desktop and the 5 verbs are available in the Code tab too.
+- **The standalone Claude Code CLI** (the `claude` terminal command, installed separately from Claude Desktop). This does *not* read `claude_desktop_config.json` — register the server with the CLI instead of hand-editing JSON:
+
+  ```bash
+  claude mcp add weave-core --scope user -- /path/to/your/theweave/venv/bin/python -m weave.mcp_server
+  ```
+
+  Set `WEAVE_VAULT_PATH` in your shell profile (or pass `--env WEAVE_VAULT_PATH=/path/to/vault` on the `claude mcp add` line) so the server can find your vault. Verify with `claude mcp list`, then start a new session — the same 5 tools appear there.
 
 ---
 
