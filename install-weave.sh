@@ -6,18 +6,32 @@
 # Usage:
 #   curl -sSL https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.sh | bash
 #   # or, with overrides:
-#   WEAVE_VERSION=0.3.0 WEAVE_HOME=~/theweave bash install-weave.sh
+#   WEAVE_VERSION=0.4.0 WEAVE_HOME=~/theweave bash install-weave.sh
 #   # or, install from a local tarball (preview / private-repo test path):
 #   WEAVE_TARBALL=~/Downloads/theweave-preview.tar.gz bash install-weave.sh
 #
 # No GitHub authentication required. Tarball is fetched from the public
 # releases endpoint by default, or read from a local file if WEAVE_TARBALL is set.
+#
+# If WEAVE_VERSION is not set, this script asks GitHub's API for the actual
+# latest release tag rather than hardcoding a version number here — a
+# hardcoded default silently goes stale the next time a release ships
+# (confirmed 2026-09-26: this script last shipped pinned to "0.3.0" after
+# v0.4.0 had already been tagged, so the default one-liner installed the
+# OLD release — the one still missing the mcp<2 fresh-install fix below).
 
 set -euo pipefail
 
-WEAVE_VERSION="${WEAVE_VERSION:-0.3.0}"
 WEAVE_HOME="${WEAVE_HOME:-$HOME/theweave}"
 WEAVE_REPO="${WEAVE_REPO:-TheWeaveSC/theweave}"
+if [ -z "${WEAVE_VERSION:-}" ]; then
+  WEAVE_VERSION="$(curl -fsSL "https://api.github.com/repos/${WEAVE_REPO}/releases/latest" \
+    | grep -m1 '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
+  if [ -z "$WEAVE_VERSION" ]; then
+    WEAVE_VERSION="0.4.0"  # last-known-good fallback if the API lookup fails
+    warn_stale_fallback=1
+  fi
+fi
 PYTHON="${PYTHON:-}"
 
 # ── colors ──────────────────────────────────────────────────────────────
@@ -37,6 +51,9 @@ info ""
 info "${C_BOLD}TheWeave installer${C_RESET} — v${WEAVE_VERSION}"
 info ""
 info "[Preflight]"
+if [ "${warn_stale_fallback:-0}" = "1" ]; then
+  warn "Could not reach GitHub's API to look up the latest release; falling back to v${WEAVE_VERSION} (may not be current — check https://github.com/${WEAVE_REPO}/releases)."
+fi
 
 # Resolve a Python ≥3.11
 if [ -z "$PYTHON" ]; then
