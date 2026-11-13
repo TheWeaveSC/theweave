@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-11-13
+
+### Fixed
+- **One-line installer installed an old, broken release.** `install-weave.sh` defaulted to a hardcoded `0.3.0`, which predates the `mcp<2` pin and fails on a fresh install (`No module named 'mcp.server.fastmcp'`). It now resolves the latest GitHub release and falls back to the last-known-good version if the lookup fails.
+- **Windows installer (beta)** — `install-weave.ps1` resolves the latest release the same way, so its default no longer goes stale after each release. Not yet field-tested on Windows hardware.
+- **Default live-Claude model** for Patterns 4 and 5 is now `claude-sonnet-5-5` (was `claude-sonnet-4-6`). Override with `WEAVE_CLAUDE_MODEL`.
+- **Python 3.14** — the test suite no longer relies on an implicit asyncio event loop (`asyncio.run` instead of `get_event_loop()`).
+
+### Changed
+- README: a plain-language introduction; a blank-vault option; a privacy note on what not to store in a vault; MCP setup for the Claude desktop app's Code tab and for the Claude Code CLI (`claude mcp add --scope user`).
+- `--lane` help text and the MCP tool docstring clarify that `"thesis"` is only the built-in label for a second, more sensitive lane.
+- Test fixtures use neutral example names.
+- Packaging: SPDX licence expression (`license = "Apache-2.0"`, setuptools >= 77), which removes a long setuptools deprecation warning from every install.
+
 ## [0.4.0] — 2026-08-20
 
 ### Added

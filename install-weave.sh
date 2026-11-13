@@ -6,7 +6,7 @@
 # Usage:
 #   curl -sSL https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.sh | bash
 #   # or, with overrides:
-#   WEAVE_VERSION=0.4.0 WEAVE_HOME=~/theweave bash install-weave.sh
+#   WEAVE_VERSION=0.4.1 WEAVE_HOME=~/theweave bash install-weave.sh
 #   # or, install from a local tarball (preview / private-repo test path):
 #   WEAVE_TARBALL=~/Downloads/theweave-preview.tar.gz bash install-weave.sh
 #
@@ -28,7 +28,7 @@ if [ -z "${WEAVE_VERSION:-}" ]; then
   WEAVE_VERSION="$(curl -fsSL "https://api.github.com/repos/${WEAVE_REPO}/releases/latest" \
     | grep -m1 '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)"
   if [ -z "$WEAVE_VERSION" ]; then
-    WEAVE_VERSION="0.4.0"  # last-known-good fallback if the API lookup fails
+    WEAVE_VERSION="0.4.1"  # last-known-good fallback if the API lookup fails
     warn_stale_fallback=1
   fi
 fi
