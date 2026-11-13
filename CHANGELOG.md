@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **One-line installer installed an old, broken release.** `install-weave.sh` defaulted to a hardcoded `0.3.0`, which predates the `mcp<2` pin and fails on a fresh install (`No module named 'mcp.server.fastmcp'`). It now resolves the latest GitHub release and falls back to the last-known-good version if the lookup fails.
-- **Windows installer (beta)** — `install-weave.ps1` resolves the latest release the same way, so its default no longer goes stale after each release. Not yet field-tested on Windows hardware.
+- **Windows installer (beta)** — `install-weave.ps1` resolves the latest release the same way, so its default no longer goes stale after each release. **Untested on Windows**: this change has not been run on Windows hardware.
 - **Default live-Claude model** for Patterns 4 and 5 is now `claude-sonnet-5-5` (was `claude-sonnet-4-6`). Override with `WEAVE_CLAUDE_MODEL`.
 - **Python 3.14** — the test suite no longer relies on an implicit asyncio event loop (`asyncio.run` instead of `get_event_loop()`).
 

@@ -52,7 +52,7 @@ if (-not $WeaveVersion) {
 }
 
 Info ""
-Info "TheWeave installer - v$WeaveVersion (Windows beta)"
+Info "TheWeave installer - v$WeaveVersion (Windows beta, not yet tested on Windows hardware)"
 Info ""
 Info "[Preflight]"
 
@@ -156,7 +156,7 @@ if ($LASTEXITCODE -eq 0) {
 
 # --- done ------------------------------------------------------------------
 Info ""
-Info "TheWeave v$WeaveVersion installed. (Windows support is BETA - feedback welcome.)"
+Info "TheWeave v$WeaveVersion installed. (Windows support is BETA and untested on Windows hardware - please report what you hit at https://github.com/$WeaveRepo/issues)"
 Info ""
 Info "Next:"
 Info "  1. Pick a starter vault (or point at your own):"

@@ -11,7 +11,7 @@
   <img src="docs/theweave-demo.gif" alt="TheWeave demo — query-driven memory retrieval over a plain markdown vault" width="100%">
 </p>
 
-**In plain words:** Claude forgets. A new chat, a switch to another model, or a different computer starts from zero, so you end up pasting the same background again or writing handoff notes. TheWeave gives Claude a memory that lives as ordinary text files in a folder you own. Claude can read it in any chat and save what matters back to it, so the next session picks up where the last one stopped, on any model, and on any machine that shares the folder. You can open, edit or delete every file in a normal text editor. The [one-line installer](#install) takes a couple of minutes, and TheWeave works with the Claude desktop app and Claude Code.
+**In plain words:** Claude forgets. A new chat, a switch to another model, or a different computer starts from zero, so you end up pasting the same background again or writing handoff notes. TheWeave gives Claude a memory that lives as ordinary text files in a folder you own. Claude can read it in any chat and save what matters back to it, so the next session picks up where the last one stopped, on any model, and on any machine that shares the folder. You can open, edit or delete every file in a normal text editor. The [one-line installer](#install) takes a couple of minutes, and TheWeave works with the Claude desktop app and Claude Code. It is tested on macOS. **Windows support is untested** (beta, see [Windows (beta)](#windows-beta)).
 
 A markdown-native memory architecture for Claude and any MCP-aware agent. Your assistant's memory lives as plain `.md` files in a directory you own — inspectable in your text editor, versionable in git, portable across machines — not in an opaque vector database somewhere else.
 
@@ -32,7 +32,7 @@ The substrate is just markdown and YAML frontmatter. No services, no embeddings 
 - **`weave lint`** — vault lint verb with machine-readable `--paths` output.
 - **Deterministic conflict pre-filter** — unrelated writes skip the LLM verdict entirely.
 - **Advisory write gate** — MCP write verbs append an advisory conflict proposal (fail-open; `WEAVE_WRITE_GATE=0` kill switch).
-- **Windows support (beta)** — see [Windows (beta)](#windows-beta).
+- **Windows support (beta, untested on Windows)** — see [Windows (beta)](#windows-beta).
 
 ---
 
@@ -223,7 +223,7 @@ v0.4.0 adds Windows support: platform-aware Claude Desktop config-path resolutio
 irm https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.ps1 | iex
 ```
 
-Honest label: the Windows path is **implemented and code-reviewed, but not yet field-tested on Windows hardware**. If you run it, please report what you hit — good or bad — via [issues](https://github.com/TheWeaveSC/theweave/issues). Known scope limits: `cortex install-nightly` is macOS-only (launchd); use Task Scheduler to run `weave-cli cortex dream` nightly instead.
+**Untested on Windows.** Honest label: the Windows path is **implemented and code-reviewed, but not yet field-tested on Windows hardware**. If you run it, please report what you hit — good or bad — via [issues](https://github.com/TheWeaveSC/theweave/issues). Known scope limits: `cortex install-nightly` is macOS-only (launchd); use Task Scheduler to run `weave-cli cortex dream` nightly instead. This includes the v0.4.1 latest-release lookup in `install-weave.ps1`, which has not yet been run on Windows either.
 
 ### MCP integration with Claude Desktop
 
