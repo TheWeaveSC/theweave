@@ -5,4 +5,4 @@ Two-tier architecture:
 - weave.pro:  PPR retrieval, bi-temporal resolver, conflict resolution, sleep-time consolidator
 """
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"

@@ -15,12 +15,12 @@ from weave.cli import cli
 
 GOOD = "---\ntitle: Good\ntype: entity\n---\n\nBody.\n"
 # The exact defect class from the incident.
-BAD = ("---\ntitle: CTL3\n"
-       "progress: v4.0 CERTIFIED LIVE 2025-06-01. NEXT PHASE: two-entity merge\n"
+BAD = ("---\ntitle: ACME Cutover\n"
+       "progress: v2.0 SIGNED OFF 2025-06-01. NEXT STEP: data migration\n"
        "---\n\nBody.\n")
 # The same note with the scalar quoted — i.e. the actual repair.
-FIXED = ("---\ntitle: CTL3\n"
-         "progress: 'v4.0 CERTIFIED LIVE 2025-06-01. NEXT PHASE: two-entity merge'\n"
+FIXED = ("---\ntitle: ACME Cutover\n"
+         "progress: 'v2.0 SIGNED OFF 2025-06-01. NEXT STEP: data migration'\n"
          "---\n\nBody.\n")
 
 
@@ -57,7 +57,7 @@ def test_hint_points_at_the_offending_line_and_names_the_defect(vault_dir):
     (vault_dir / "HomeVault" / "entities" / "entity-bad.md").write_text(
         BAD, encoding="utf-8")
     out = _run(vault_dir).output
-    assert "3: progress: v4.0 CERTIFIED LIVE" in out   # the actual source line
+    assert "3: progress: v2.0 SIGNED OFF" in out   # the actual source line
     assert "single quotes" in out                       # the actual remedy
 
 

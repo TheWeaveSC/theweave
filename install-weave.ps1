@@ -5,7 +5,7 @@
 # Usage (PowerShell 5.1+ / PowerShell 7):
 #   irm https://github.com/TheWeaveSC/theweave/releases/latest/download/install-weave.ps1 | iex
 #   # or, with overrides:
-#   $env:WEAVE_VERSION="0.4.0"; $env:WEAVE_HOME="$HOME\theweave"; .\install-weave.ps1
+#   $env:WEAVE_VERSION="0.4.1"; $env:WEAVE_HOME="$HOME\theweave"; .\install-weave.ps1
 #   # or, install from a local zip (preview / private-repo test path):
 #   $env:WEAVE_ZIP="$HOME\Downloads\theweave-preview.zip"; .\install-weave.ps1
 #
@@ -25,7 +25,6 @@
 
 $ErrorActionPreference = "Stop"
 
-$WeaveVersion = if ($env:WEAVE_VERSION) { $env:WEAVE_VERSION } else { "0.4.0" }
 $WeaveHome    = if ($env:WEAVE_HOME)    { $env:WEAVE_HOME }    else { Join-Path $HOME "theweave" }
 $WeaveRepo    = if ($env:WEAVE_REPO)    { $env:WEAVE_REPO }    else { "TheWeaveSC/theweave" }
 
@@ -34,8 +33,26 @@ function Ok([string]$msg)    { Write-Host "  [ok] $msg" -ForegroundColor Green }
 function Warn2([string]$msg) { Write-Host "  [!]  $msg" -ForegroundColor Yellow }
 function Fail([string]$msg)  { Write-Host "  [x]  $msg" -ForegroundColor Red; exit 1 }
 
+# Version: WEAVE_VERSION wins. Otherwise ask GitHub for the latest release tag
+# (mirrors install-weave.sh), so the default never goes stale after a release.
+# Falls back to the last-known-good version if the lookup fails.
+$WeaveVersion = $env:WEAVE_VERSION
+if (-not $WeaveVersion) {
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+        $latest = Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$WeaveRepo/releases/latest" -Headers @{ "User-Agent" = "theweave-installer" }
+        $WeaveVersion = ([string]$latest.tag_name).TrimStart("v")
+    } catch {
+        $WeaveVersion = ""
+    }
+    if (-not $WeaveVersion) {
+        $WeaveVersion = "0.4.1"
+        Warn2 "Could not look up the latest release; falling back to v$WeaveVersion."
+    }
+}
+
 Info ""
-Info "TheWeave installer - v$WeaveVersion (Windows beta)"
+Info "TheWeave installer - v$WeaveVersion (Windows beta, not yet tested on Windows hardware)"
 Info ""
 Info "[Preflight]"
 
@@ -139,7 +156,7 @@ if ($LASTEXITCODE -eq 0) {
 
 # --- done ------------------------------------------------------------------
 Info ""
-Info "TheWeave v$WeaveVersion installed. (Windows support is BETA - feedback welcome.)"
+Info "TheWeave v$WeaveVersion installed. (Windows support is BETA and untested on Windows hardware - please report what you hit at https://github.com/$WeaveRepo/issues)"
 Info ""
 Info "Next:"
 Info "  1. Pick a starter vault (or point at your own):"

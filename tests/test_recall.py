@@ -123,7 +123,7 @@ def test_mcp_recall_registered(vault, monkeypatch, readonly):
     monkeypatch.setenv("WEAVE_VAULT_PATH", str(vault.root))
     monkeypatch.setenv("WEAVE_READONLY", readonly)
     from weave.mcp_server import build_server
-    tools = asyncio.get_event_loop().run_until_complete(build_server().list_tools())
+    tools = asyncio.run(build_server().list_tools())
     names = {t.name for t in tools}
     assert "recall" in names and "view" in names and "hydrate" in names
     if readonly == "1":

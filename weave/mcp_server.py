@@ -136,7 +136,13 @@ def build_server() -> FastMCP:
         `lane` (lane firewall): one of "operational" (default), "thesis",
         "neutral". Only notes in the requested lane (or neutral) are ever
         retrievable — choosing a lane is a deliberate anonymisation-boundary
-        decision, never auto-detected from the query.
+        decision, never auto-detected from the query. NOTE: these three
+        names are fixed in this build, not placeholders you can rename —
+        "thesis" is only the built-in label for "your second, more
+        sensitive category"; use it for whatever that is in your own vault
+        (it does not need to be an academic thesis). Most single-vault
+        setups never need a second lane and can ignore this parameter
+        entirely (the "operational" default covers everything).
         """
         try:
             from .pro.recall import recall as _recall

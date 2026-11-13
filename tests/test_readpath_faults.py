@@ -24,8 +24,8 @@ from weave.pro.ppr import PPRBoot
 # value contains ": ", which YAML reads as a nested mapping.
 BAD_FRONTMATTER = (
     "---\n"
-    "title: CTL3 FM Rebuild\n"
-    "progress: v4.0 CERTIFIED LIVE 2025-06-01. NEXT PHASE: two-entity merge\n"
+    "title: ACME Cutover Plan\n"
+    "progress: v2.0 SIGNED OFF 2025-06-01. NEXT STEP: data migration\n"
     "---\n\n"
     "Body text that mentions [[entity-good]].\n"
 )
@@ -77,8 +77,8 @@ def test_freshness_is_independent_of_parse_success(mixed_vault):
     # quote the scalar so it genuinely parses -> hash changes, because the
     # BYTES changed. Not because parseability changed: that is the point.
     repaired = BAD_FRONTMATTER.replace(
-        "progress: v4.0 CERTIFIED LIVE 2025-06-01. NEXT PHASE: two-entity merge",
-        "progress: 'v4.0 CERTIFIED LIVE 2025-06-01. NEXT PHASE: two-entity merge'")
+        "progress: v2.0 SIGNED OFF 2025-06-01. NEXT STEP: data migration",
+        "progress: 'v2.0 SIGNED OFF 2025-06-01. NEXT STEP: data migration'")
     bad.write_text(repaired, encoding="utf-8")
     mixed_vault.load_note("HomeVault/entities/entity-bad.md")  # asserts it parses
     assert source_map(mixed_vault) != before

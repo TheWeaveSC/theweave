@@ -347,7 +347,10 @@ def demo_fixture(out: str) -> None:
               type=click.Choice(["operational", "thesis", "neutral"]),
               help="lane firewall lane to search. Only notes in the chosen "
                    "lane (or neutral) are retrievable — pick deliberately, "
-                   "never auto-detected.")
+                   "never auto-detected. These 3 names are fixed in this "
+                   "build; 'thesis' is just the built-in label for a "
+                   "second, more-sensitive category — most vaults never "
+                   "need it and can leave --lane at its default.")
 @click.option("--fake-embedder", is_flag=True, default=False, hidden=True)
 @vault_option
 def recall_cmd(query: tuple[str, ...], top: int, lane: str, fake_embedder: bool,
