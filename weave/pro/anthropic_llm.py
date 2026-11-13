@@ -17,7 +17,7 @@ from typing import Literal
 
 from .mock_llm import ClassifyResult, Verdict
 
-_MODEL = os.environ.get("WEAVE_CLAUDE_MODEL", "claude-sonnet-4-6")
+_MODEL = os.environ.get("WEAVE_CLAUDE_MODEL", "claude-sonnet-5-5")
 
 
 def _client():

@@ -101,7 +101,7 @@ Patterns 4 and 5 (consolidator reflect step + conflict classifier) default to de
 ```bash
 pip install -e ".[anthropic]"
 export ANTHROPIC_API_KEY=sk-ant-...
-export WEAVE_CLAUDE_MODEL=claude-sonnet-4-6   # optional override
+export WEAVE_CLAUDE_MODEL=claude-sonnet-5-5   # optional override
 ./weave-cli demo consolidate                  # now uses Claude for reflect
 ./weave-cli demo write /tmp/foo.md            # now uses Claude for the verdict
 ```
